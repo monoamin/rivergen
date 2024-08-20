@@ -23,6 +23,9 @@ Vec3 n_pos = Util.getSmoothedNormal(pos, serverLevel, 2);
 Vec3 f_pos = new Vec3(n_pos.x, 0d, n_pos.z).normalize();
 ```
 
+![grafik](https://github.com/user-attachments/assets/a16691bc-02b6-4e63-85d1-1c4a80640fa2)
+
+
 ### 2. **Flow Accumulation**
 
 Flow accumulation is computed by:
