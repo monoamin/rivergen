@@ -1,11 +1,10 @@
-package net.monoamin.erosion;
+package net.monoamin.rivergen;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -14,9 +13,9 @@ import org.joml.Matrix4f;
 import java.util.HashMap;
 import java.util.Map;
 
-@Mod.EventBusSubscriber(modid = "erosion")
+@Mod.EventBusSubscriber(modid = "rivergen")
 public class RenderHandler {
-    public static Map<String, Tuple<Vec3, Vec3>> solutionSet = new HashMap<>();
+    public static Map<String, LineData> solutionSet = new HashMap<>();
 
     @SubscribeEvent
     public static void onRenderLevelStageEvent(RenderLevelStageEvent event) {
@@ -31,14 +30,14 @@ public class RenderHandler {
 
         VertexConsumer consumer = bufSource.getBuffer(RenderType.LINES);  // Move outside the loop
 
-        for (Map.Entry<String, Tuple<Vec3, Vec3>> entry : solutionSet.entrySet()) {
-            Tuple<Vec3, Vec3> points = entry.getValue();
-            Vec3 start = points.getA();
-            Vec3 end = points.getB();
+        for (Map.Entry<String, LineData> entry : solutionSet.entrySet()) {
+            LineData lineData = entry.getValue();
+            Vec3 start = lineData.getStart();
+            Vec3 end = lineData.getEnd();
 
-            // Define the two points for the line
-            definePoint(consumer, matrix, start);
-            definePoint(consumer, matrix, end);
+            // Define the two points for the line with the specified color
+            definePoint(consumer, matrix, start, lineData);
+            definePoint(consumer, matrix, end, lineData);
         }
 
         bufSource.endBatch();  // Ensure this is called after all lines are defined
@@ -46,13 +45,13 @@ public class RenderHandler {
         pose.popPose();
     }
 
-    public static void AddLineIfAbsent(String label, Vec3 a, Vec3 b) {
-        solutionSet.putIfAbsent(label, new Tuple<Vec3, Vec3>(a, b));
+    public static void AddLineIfAbsent(String label, Vec3 a, Vec3 b, int red, int green, int blue, int alpha) {
+        solutionSet.putIfAbsent(label, new LineData(a, b, red, green, blue, alpha));
     }
 
-    public static void definePoint(VertexConsumer consumer, Matrix4f matrix, Vec3 p) {
+    public static void definePoint(VertexConsumer consumer, Matrix4f matrix, Vec3 p, LineData lineData) {
         consumer.vertex(matrix, (float) p.x + 0.5f, (float) p.y + 0.5f, (float) p.z + 0.5f)
-                .color(255, 10, 10, 255)
+                .color(lineData.getRed(), lineData.getGreen(), lineData.getBlue(), lineData.getAlpha())
                 .normal(0, 1, 0)
                 .endVertex();
     }

@@ -1,4 +1,4 @@
-package net.monoamin.erosion;
+package net.monoamin.rivergen;
 
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.OutgoingChatMessage;

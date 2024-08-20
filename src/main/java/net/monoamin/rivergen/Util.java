@@ -1,17 +1,14 @@
-package net.monoamin.erosion;
+package net.monoamin.rivergen;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.phys.Vec3;
 
 public class Util {
     public static boolean levelLoaded = false;
-    public static FluidGrid fluidGrid;
 
     public static BlockState getColoredWoolForNormal(Vec3 normal) {
         // Extract the x and z components of the normal
@@ -58,6 +55,46 @@ public class Util {
         return horizontalMagnitude / verticalComponent;
     }
 
+    public static Vec3 getSmoothedNormalCorrect(BlockPos pos, ServerLevel level, int radius) {
+        Vec3 accumulatedNormal = new Vec3(0, 0, 0);
+        double totalWeight = 0;
+
+        // Loop through a square grid around the target position
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                // Get the heights at the current sample point and its neighbors
+                int currentX = pos.getX() + dx;
+                int currentZ = pos.getZ() + dz;
+                BlockPos currentPos = pos.offset(dx, 0, dz);
+
+                int y = getYValueAt(currentPos, level);
+                int ynx = getYValueAt(currentPos.offset(-1, 0, 0), level);
+                int ypx = getYValueAt(currentPos.offset(1, 0, 0), level);
+                int ynz = getYValueAt(currentPos.offset(0, 0, -1), level);
+                int ypz = getYValueAt(currentPos.offset(0, 0, 1), level);
+
+                // Correct calculation of the local normal
+                double dxHeight = (double) (ypx - ynx) / 2.0;
+                double dzHeight = (double) (ypz - ynz) / 2.0;
+                Vec3 localNormal = new Vec3(-dxHeight, 1.0, -dzHeight).normalize();
+
+                // Calculate the distance from the center and use it as a weight
+                double distance = Math.sqrt(dx * dx + dz * dz);
+                double weight = 1.0 / (distance + 1.0); // Add 1.0 to avoid division by zero
+
+                // Accumulate the weighted normal
+                accumulatedNormal = accumulatedNormal.add(localNormal.scale(weight));
+                totalWeight += weight;
+            }
+        }
+
+        // Average the accumulated normal
+        Vec3 averagedNormal = accumulatedNormal.scale(1.0 / totalWeight);
+
+        // Normalize the final vector to ensure it is a unit vector
+        return averagedNormal.normalize();
+    }
+
     public static Vec3 getSmoothedNormal(BlockPos pos, ServerLevel level, int radius) {
         Vec3 accumulatedNormal = new Vec3(0, 0, 0);
         double totalWeight = 0;
@@ -68,11 +105,11 @@ public class Util {
                 // Get the heights at the current sample point and its neighbors
                 int currentX = pos.getX() + dx;
                 int currentZ = pos.getZ() + dz;
-                int y = getYValueAt(new BlockPos(pos.getX(), pos.getY(), pos.getZ()), level);
-                int ynx = getYValueAt(new BlockPos(pos.getX() - 1, pos.getY(), pos.getZ()), level);
-                int ypx = getYValueAt(new BlockPos(pos.getX() + 1, pos.getY(), pos.getZ()), level);
-                int ynz = getYValueAt(new BlockPos(pos.getX(), pos.getY(), pos.getZ() - 1), level);
-                int ypz = getYValueAt(new BlockPos(pos.getX(), pos.getY(), pos.getZ() + 1), level);
+                int y = getYValueAt(pos, level);
+                int ynx = getYValueAt(pos.offset(-1,0,0), level);
+                int ypx = getYValueAt(pos.offset(1,0,0), level);
+                int ynz = getYValueAt(pos.offset(0,0,-1), level);
+                int ypz = getYValueAt(pos.offset(0,0,1), level);
 
                 // Correct calculation of the local normal
                 double dxHeight = (double) (ypx - ynx) / 2.0;
@@ -100,7 +137,7 @@ public class Util {
         //level.getChunk(pos).getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ());
         //NoiseBasedChunkGenerator generator = (NoiseBasedChunkGenerator) level.getChunkSource().getGenerator();
 
-        return level.getChunk(pos).getHeight(Heightmap.Types.WORLD_SURFACE, pos.getX()%16, pos.getZ()%16);
+        return level.getChunk(pos).getHeight(Heightmap.Types.WORLD_SURFACE, pos.getX(), pos.getZ());
         //return generator.generatorSettings().get().noiseRouter().finalDensity().compute(new DensityFunction.SinglePointContext(pos.getX(), pos.getY(), pos.getZ()));
     }
 

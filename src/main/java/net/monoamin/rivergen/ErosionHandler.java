@@ -1,18 +1,14 @@
-package net.monoamin.erosion;
+package net.monoamin.rivergen;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-@Mod.EventBusSubscriber(modid = "erosion")
+@Mod.EventBusSubscriber(modid = "rivergen")
 public class ErosionHandler {
 
     static int tickCounter = 0;
@@ -48,8 +44,6 @@ public class ErosionHandler {
 
     public static void doErosionCalculation(BlockPos blockPos) {
         ChatMessageHandler.Send("Running...", serverLevel);
-        BlockPos above = new BlockPos(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ());
         fluidGrid.start(blockPos, true);
-        RenderHandler.AddLineIfAbsent(blockPos.toString(), Util.BlockPosToVec3(blockPos), Util.BlockPosToVec3(above));
     }
 }

@@ -1,7 +1,5 @@
-package net.monoamin.erosion;
+package net.monoamin.rivergen;
 
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
@@ -17,11 +15,18 @@ import net.minecraftforge.eventbus.api.IEventBus;
 
 @Mod(Erosion.MODID)
 public class Erosion {
-    public static final String MODID = "erosion";
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, "erosion");
-    public static final RegistryObject<Item> DEBUG_STICK = ITEMS.register("debug_stick",
+    public static final String MODID = "rivergen";
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, "rivergen");
+    public static final RegistryObject<Item> DEBUG_GETHEIGHT = ITEMS.register("get_height",
             () -> new DebugStickItem(new Item.Properties().stacksTo(1)));
-
+    public static final RegistryObject<Item> DEBUG_GETNORMAL = ITEMS.register("get_normal",
+            () -> new DebugStickItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> DEBUG_GETFLOW = ITEMS.register("get_flow",
+            () -> new DebugStickItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> DEBUG_GETACCUMULATION = ITEMS.register("get_accumulation",
+            () -> new DebugStickItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> DEBUG_STARTGEN = ITEMS.register("start_gen",
+            () -> new DebugStickItem(new Item.Properties().stacksTo(1)));
 
     public Erosion() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -41,7 +46,11 @@ public class Erosion {
     public void buildContents(BuildCreativeModeTabContentsEvent event) {
         // Add to ingredients tab
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
-            event.accept(DEBUG_STICK.get());
+            event.accept(DEBUG_GETHEIGHT.get());
+            event.accept(DEBUG_GETNORMAL.get());
+            event.accept(DEBUG_GETFLOW.get());
+            event.accept(DEBUG_GETACCUMULATION.get());
+            event.accept(DEBUG_STARTGEN.get());
         }
     }
 }
