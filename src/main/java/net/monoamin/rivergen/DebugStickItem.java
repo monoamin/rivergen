@@ -33,7 +33,7 @@ public class DebugStickItem extends Item {
         // Define your custom action here
         // For example, changing block states, interacting with entities, etc.
         //ChatMessageHandler.Send("Triggering Calculation!", player.getServer().overworld());
-        //ErosionHandler.doErosionCalculation(blockPos);
+        //RivergenHandler.doErosionCalculation(blockPos);
     }
 
     @Override
@@ -81,7 +81,7 @@ public class DebugStickItem extends Item {
                 );
                 break;
             case "item.rivergen.get_accumulation":
-                Vec3 accumulation = ErosionHandler.fluidGrid.accumulations.get(blockPos);
+                Vec3 accumulation = RivergenHandler.fluidGrid.accumulations.get(blockPos);
                 ChatMessageHandler.Send("GetAccumulation used! Accumulation is " + accumulation.toString(), player.getServer().overworld());
                 RenderHandler.AddLineIfAbsent(
                         "f"+Util.idFromXZ(blockPos),
@@ -92,7 +92,7 @@ public class DebugStickItem extends Item {
                 break;
             case "item.rivergen.start_gen":
                 ChatMessageHandler.Send("StartGen used!", player.getServer().overworld());
-                ErosionHandler.doErosionCalculation(blockPos);
+                //RivergenHandler.doErosionCalculation(blockPos);
                 break;
             default: break;
         }

@@ -141,14 +141,32 @@ public class Util {
         //return generator.generatorSettings().get().noiseRouter().finalDensity().compute(new DensityFunction.SinglePointContext(pos.getX(), pos.getY(), pos.getZ()));
     }
 
+    public static int getYValueAt(int x, int z, ServerLevel level) {
+        //level.getChunk(pos).getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ());
+        //NoiseBasedChunkGenerator generator = (NoiseBasedChunkGenerator) level.getChunkSource().getGenerator();
+
+        BlockPos pos = new BlockPos(x, 0, z);
+
+        return level.getChunk(pos).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+        //return generator.generatorSettings().get().noiseRouter().finalDensity().compute(new DensityFunction.SinglePointContext(pos.getX(), pos.getY(), pos.getZ()));
+    }
+
     public static String idFromXZ(BlockPos pos)
     {
         return String.format("%05d", pos.getX()) + String.format("%05d", pos.getZ());
     }
 
+    public static String idFromVec3(Vec3 vec)
+    {
+        return String.format("%08d", vec.x) + String.format("%08d", vec.y) + String.format("%08d", vec.z);
+    }
+
     public static Vec3 BlockPosToVec3(BlockPos pos)
     {
         return new Vec3(pos.getX(), pos.getY(), pos.getZ());
-
+    }
+    public static BlockPos Vec3ToBlockPos(Vec3 vec)
+    {
+        return new BlockPos((int)vec.x, (int)vec.y, (int)vec.z);
     }
 }

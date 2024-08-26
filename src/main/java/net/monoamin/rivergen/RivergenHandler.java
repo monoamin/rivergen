@@ -9,7 +9,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = "rivergen")
-public class ErosionHandler {
+public class RivergenHandler {
 
     static int tickCounter = 0;
     static int radius = 20;
@@ -22,10 +22,10 @@ public class ErosionHandler {
         tickCounter++;
         if (tickCounter % 600 == 0) { // Once per 30s
             if (world_isLoaded) {
-                for (ServerPlayer player : serverLevel.getServer().getPlayerList().getPlayers()) {
+                //for (ServerPlayer player : serverLevel.getServer().getPlayerList().getPlayers()) {
                     //BlockPos pos = new BlockPos(player.getBlockX(), player.getBlockY() - 1, player.getBlockZ());
                     //ChatMessageHandler.Send("pX: " + pos.getX() + " pY: " + pos.getY() + " pZ: " + pos.getZ(), serverLevel);
-                }
+                //}
             }
             tickCounter = 0;
         }

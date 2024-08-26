@@ -13,8 +13,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.eventbus.api.IEventBus;
 
-@Mod(Erosion.MODID)
-public class Erosion {
+@Mod(Rivergen.MODID)
+public class Rivergen {
     public static final String MODID = "rivergen";
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, "rivergen");
     public static final RegistryObject<Item> DEBUG_GETHEIGHT = ITEMS.register("get_height",
@@ -28,12 +28,12 @@ public class Erosion {
     public static final RegistryObject<Item> DEBUG_STARTGEN = ITEMS.register("start_gen",
             () -> new DebugStickItem(new Item.Properties().stacksTo(1)));
 
-    public Erosion() {
+    public Rivergen() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::setup);
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(RenderHandler.class);
-        MinecraftForge.EVENT_BUS.register(ErosionHandler.class);
+        MinecraftForge.EVENT_BUS.register(RivergenHandler.class);
         ITEMS.register(modEventBus);
         // Register event bus to listen for creative tab build events
         modEventBus.addListener(this::buildContents);
