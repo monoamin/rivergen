@@ -1,6 +1,6 @@
 ---
 
-# Erosion and River Generation in Procedurally Generated Worlds
+# RiverGen
 
 ## Project Overview
 
