@@ -22,7 +22,7 @@ public class RiverNetwork {
         lines = drawLines;
     }
 
-    public void start(Vec3 startCoordinate, boolean drawLines) {
+    public River start(Vec3 startCoordinate, boolean drawLines) {
         River river = new River(startCoordinate, Util.idFromVec3(startCoordinate), serverLevel);
 
         while (!river.finalized)
@@ -30,9 +30,11 @@ public class RiverNetwork {
             river.doStepAuto();
         }
 
+
         rivers.add(river);
 
         traceRivers();
+        return river;
     }
 
     // Trace and carve river paths from points of maximum accumulation
@@ -44,7 +46,7 @@ public class RiverNetwork {
         for (River river: rivers)
         {
             for (int i = 1; i <= river.length(); i++) {
-                RenderHandler.AddLineIfAbsent(Util.idFromVec3(river.getCoordinateAtIndex(i)), river.getPath().get(i-1).add(0,1,0), river.getPath().get(i).add(0,1,0), 50, 50, 255, 255);
+                RenderHandler.AddLineIfAbsent(Util.idFromVec3(river.getCoordinateAtIndex(i)), river.getPath().get(i-1).add(0,1,0), river.getPath().get(i).add(0,1,0), 50, 100, 255, 255);
             }
         }
 

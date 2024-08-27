@@ -28,7 +28,7 @@ public class RenderHandler {
         pose.translate(-camera.x, -camera.y, -camera.z);
         Matrix4f matrix = pose.last().pose();
 
-        VertexConsumer consumer = bufSource.getBuffer(RenderType.LINES);  // Move outside the loop
+        VertexConsumer consumer = bufSource.getBuffer(RenderType.lines());  // Move outside the loop
 
         for (Map.Entry<String, LineData> entry : solutionSet.entrySet()) {
             LineData lineData = entry.getValue();

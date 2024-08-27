@@ -2,6 +2,7 @@ package net.monoamin.rivergen;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.CubicSpline;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
@@ -34,47 +35,41 @@ public class River {
     }
 
     public void doStepAuto() {
-        try {
-            Vec3 currentPoint = riverPath.get(segmentCount);
-            Vec3 nextPoint = currentPoint;
-            boolean stepped = false;
-            int radius = stepRadiusMin;
+        Vec3 currentPoint = riverPath.get(segmentCount);
+        Vec3 nextPoint = currentPoint;
+        boolean stepped = false;
+        int radius = stepRadiusMin;
 
-            while (radius <= stepRadiusMax && !stepped) {
-                Vec3 candidatePoint = nextPoint;
-                double minElevation = nextPoint.y;
+        while (radius <= stepRadiusMax && !stepped) {
+            Vec3 candidatePoint = nextPoint;
+            double minElevation = nextPoint.y;
 
-                for (int x = -radius; x <= radius; x++) {
-                    for (int z = -radius; z <= radius; z++) {
-                        BlockPos cursorPos = new BlockPos((int) currentPoint.x + x, (int) currentPoint.y, (int) currentPoint.z + z);
-                        int yLevelAtCursor = Util.getYValueAt(cursorPos.getX(), cursorPos.getZ(), serverLevel.getServer().overworld());
+            for (int x = -radius; x <= radius; x++) {
+                for (int z = -radius; z <= radius; z++) {
+                    BlockPos cursorPos = new BlockPos((int) currentPoint.x + x, (int) currentPoint.y, (int) currentPoint.z + z);
+                    int yLevelAtCursor = Util.getYValueAt(cursorPos.getX(), cursorPos.getZ(), serverLevel.getServer().overworld());
 
-                        if (yLevelAtCursor < minElevation) {
-                            minElevation = yLevelAtCursor;
-                            candidatePoint = new Vec3(currentPoint.x + x, yLevelAtCursor, currentPoint.z + z);
-                            stepped = true;
-                        }
+                    if (yLevelAtCursor < minElevation) {
+                        minElevation = yLevelAtCursor;
+                        candidatePoint = new Vec3(currentPoint.x + x, yLevelAtCursor, currentPoint.z + z);
+                        stepped = true;
                     }
-                }
-
-                if (stepped) {
-                    nextPoint = candidatePoint;
-                    break;
-                } else {
-                    radius += stepRadiusMin;
                 }
             }
 
             if (stepped) {
-                riverPath.add(nextPoint);
-                segmentCount++;
+                nextPoint = candidatePoint;
+                break;
             } else {
-                finalized = true;
+                radius += stepRadiusMin;
             }
         }
-        catch (Exception e)
-        {
-            ChatMessageHandler.Send("Error", serverLevel.getServer().overworld());
+
+        if (stepped) {
+            riverPath.add(nextPoint);
+            segmentCount++;
+        } else {
+            finalized = true;
         }
     }
 

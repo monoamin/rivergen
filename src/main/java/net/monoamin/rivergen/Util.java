@@ -2,6 +2,7 @@ package net.monoamin.rivergen;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -163,5 +164,9 @@ public class Util {
     public static BlockPos Vec3ToBlockPos(Vec3 vec)
     {
         return new BlockPos((int)vec.x, (int)vec.y, (int)vec.z);
+    }
+
+    public static void setBlock(ServerLevel level, BlockPos blockPos, Block block) {
+        level.setBlockAndUpdate(blockPos, block.defaultBlockState());
     }
 }

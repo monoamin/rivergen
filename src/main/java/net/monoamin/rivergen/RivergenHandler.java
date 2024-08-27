@@ -16,6 +16,7 @@ public class RivergenHandler {
     static boolean world_isLoaded = false;
     static FluidGrid fluidGrid;
     static RiverNetwork riverNetwork;
+    static TerrainCarver terrainCarver;
 
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent event) {
@@ -38,12 +39,14 @@ public class RivergenHandler {
             world_isLoaded = true;
             //fluidGrid = new FluidGrid(level, true);
             riverNetwork = new RiverNetwork(level, true);
+            terrainCarver = new TerrainCarver(level, 3);
             ChatMessageHandler.Send("Loaded.", serverLevel);
         }
     }
 
     public static void traceRiver(BlockPos blockPos) {
         ChatMessageHandler.Send("Running...", serverLevel);
-        riverNetwork.start(Util.BlockPosToVec3(blockPos), true);
+        River r = riverNetwork.start(Util.BlockPosToVec3(blockPos), true);
+        terrainCarver.carveChannel(r.getPath());
     }
 }
