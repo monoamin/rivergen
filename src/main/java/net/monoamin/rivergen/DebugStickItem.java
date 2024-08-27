@@ -92,7 +92,7 @@ public class DebugStickItem extends Item {
                 break;
             case "item.rivergen.start_gen":
                 ChatMessageHandler.Send("StartGen used!", player.getServer().overworld());
-                //RivergenHandler.doErosionCalculation(blockPos);
+                RivergenHandler.traceRiver(blockPos);
                 break;
             default: break;
         }

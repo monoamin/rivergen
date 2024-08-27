@@ -137,18 +137,13 @@ public class Util {
         //level.getChunk(pos).getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ());
         //NoiseBasedChunkGenerator generator = (NoiseBasedChunkGenerator) level.getChunkSource().getGenerator();
 
-        return level.getChunk(pos).getHeight(Heightmap.Types.WORLD_SURFACE, pos.getX(), pos.getZ());
+        return level.getChunk(pos).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
         //return generator.generatorSettings().get().noiseRouter().finalDensity().compute(new DensityFunction.SinglePointContext(pos.getX(), pos.getY(), pos.getZ()));
     }
 
     public static int getYValueAt(int x, int z, ServerLevel level) {
-        //level.getChunk(pos).getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ());
-        //NoiseBasedChunkGenerator generator = (NoiseBasedChunkGenerator) level.getChunkSource().getGenerator();
-
         BlockPos pos = new BlockPos(x, 0, z);
-
-        return level.getChunk(pos).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
-        //return generator.generatorSettings().get().noiseRouter().finalDensity().compute(new DensityFunction.SinglePointContext(pos.getX(), pos.getY(), pos.getZ()));
+        return level.getChunk(pos).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
     }
 
     public static String idFromXZ(BlockPos pos)
@@ -158,7 +153,7 @@ public class Util {
 
     public static String idFromVec3(Vec3 vec)
     {
-        return String.format("%08d", vec.x) + String.format("%08d", vec.y) + String.format("%08d", vec.z);
+        return String.format("%08d", (int)vec.x) + String.format("%08d", (int)vec.y) + String.format("%08d", (int)vec.z);
     }
 
     public static Vec3 BlockPosToVec3(BlockPos pos)

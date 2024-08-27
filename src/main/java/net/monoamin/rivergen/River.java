@@ -13,6 +13,7 @@ public class River {
     private int segmentCount;
     private String id;
     private int stepRadiusMax = 32;
+    private int stepRadiusMin = 1;
     private double forceStepMinSlope = 0.5;
     ServerLevel serverLevel;
 
@@ -33,33 +34,62 @@ public class River {
     }
 
     public void doStepAuto() {
-        Vec3 nextPoint = riverPath.get(segmentCount);
-        boolean stepped = false;
-        for (int x = -(stepRadiusMax / 2); x < (stepRadiusMax / 2); x++) {
-            for (int z = -(stepRadiusMax / 2); z < (stepRadiusMax / 2); z++) {
-                BlockPos cursorPos = new BlockPos((int) nextPoint.x + x, (int) nextPoint.y, (int) nextPoint.z + z);
-                int yLevelAtCursor = Util.getYValueAt(cursorPos.getX(), cursorPos.getZ(), serverLevel);
-                double dotp = 1 - Util.getSmoothedNormal(cursorPos, serverLevel, 5).normalize().dot(new Vec3(0, -1, 0));
-                if (yLevelAtCursor < nextPoint.y) // || dotp > 0.5)
-                {
-                    nextPoint = new Vec3(nextPoint.x + x, yLevelAtCursor, nextPoint.z + z);
-                    stepped = true;
+        try {
+            Vec3 currentPoint = riverPath.get(segmentCount);
+            Vec3 nextPoint = currentPoint;
+            boolean stepped = false;
+            int radius = stepRadiusMin;
+
+            while (radius <= stepRadiusMax && !stepped) {
+                Vec3 candidatePoint = nextPoint;
+                double minElevation = nextPoint.y;
+
+                for (int x = -radius; x <= radius; x++) {
+                    for (int z = -radius; z <= radius; z++) {
+                        BlockPos cursorPos = new BlockPos((int) currentPoint.x + x, (int) currentPoint.y, (int) currentPoint.z + z);
+                        int yLevelAtCursor = Util.getYValueAt(cursorPos.getX(), cursorPos.getZ(), serverLevel.getServer().overworld());
+
+                        if (yLevelAtCursor < minElevation) {
+                            minElevation = yLevelAtCursor;
+                            candidatePoint = new Vec3(currentPoint.x + x, yLevelAtCursor, currentPoint.z + z);
+                            stepped = true;
+                        }
+                    }
+                }
+
+                if (stepped) {
+                    nextPoint = candidatePoint;
+                    break;
+                } else {
+                    radius += stepRadiusMin;
                 }
             }
-        }
 
-        if (stepped) {
-            riverPath.add(nextPoint);
-            segmentCount++;
+            if (stepped) {
+                riverPath.add(nextPoint);
+                segmentCount++;
+            } else {
+                finalized = true;
+            }
         }
-        else
+        catch (Exception e)
         {
-            finalized = true;
+            ChatMessageHandler.Send("Error", serverLevel.getServer().overworld());
         }
     }
 
     public ArrayList<Vec3> getPath()
     {
         return riverPath;
+    }
+
+    public Vec3 getCoordinateAtIndex(int index)
+    {
+        return riverPath.get(index);
+    }
+
+    public int length()
+    {
+        return segmentCount;
     }
 }

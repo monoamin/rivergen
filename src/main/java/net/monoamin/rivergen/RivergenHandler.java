@@ -2,7 +2,6 @@ package net.monoamin.rivergen;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -16,6 +15,7 @@ public class RivergenHandler {
     static ServerLevel serverLevel;
     static boolean world_isLoaded = false;
     static FluidGrid fluidGrid;
+    static RiverNetwork riverNetwork;
 
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent event) {
@@ -36,14 +36,14 @@ public class RivergenHandler {
         if (event.getLevel() instanceof ServerLevel level) {
             serverLevel = level;
             world_isLoaded = true;
-            fluidGrid = new FluidGrid(level, true);
-
+            //fluidGrid = new FluidGrid(level, true);
+            riverNetwork = new RiverNetwork(level, true);
             ChatMessageHandler.Send("Loaded.", serverLevel);
         }
     }
 
-    public static void doErosionCalculation(BlockPos blockPos) {
+    public static void traceRiver(BlockPos blockPos) {
         ChatMessageHandler.Send("Running...", serverLevel);
-        fluidGrid.start(blockPos, true);
+        riverNetwork.start(Util.BlockPosToVec3(blockPos), true);
     }
 }
