@@ -153,7 +153,7 @@ public class Util {
 
     public static int getHeightFromDensity(int blockX, int blockZ, ServerLevel level)
     {
-        int height = -1;
+        int height = 62;
         for (int y = level.getMaxBuildHeight()-1; y > 62; y--)
         {
             BlockPos cursorPos = new BlockPos(blockX, y, blockZ);

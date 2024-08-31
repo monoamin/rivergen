@@ -80,7 +80,7 @@ public class River {
         int radius = stepRadiusMin;
         while (radius <= stepRadiusMax && !stepped) {
             nextPoint = currentPoint;
-            BlockPos lowestCircular = Util.getLowestCircular(currentPoint, radius, 8, serverLevel.getServer().overworld());
+            BlockPos lowestCircular = Util.getLowestCircular(currentPoint, radius, 16, serverLevel.getServer().overworld());
             if (lowestCircular.getY() < currentPoint.y)
             {
                 nextPoint = Util.BlockPosToVec3(lowestCircular);

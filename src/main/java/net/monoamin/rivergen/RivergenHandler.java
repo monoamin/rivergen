@@ -39,7 +39,7 @@ public class RivergenHandler {
             world_isLoaded = true;
             //fluidGrid = new FluidGrid(level, true);
             riverNetwork = new RiverNetwork(level, true);
-            terrainCarver = new TerrainCarver(level, 3);
+            terrainCarver = new TerrainCarver(level, 5);
             ChatMessageHandler.Send("Loaded.", serverLevel);
         }
     }
