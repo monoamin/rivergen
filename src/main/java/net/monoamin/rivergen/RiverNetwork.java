@@ -27,7 +27,7 @@ public class RiverNetwork {
 
         while (!river.finalized)
         {
-            river.doStepAuto();
+            river.doStepAuto2();
         }
 
 

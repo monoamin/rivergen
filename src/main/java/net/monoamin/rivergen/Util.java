@@ -5,11 +5,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.phys.Vec3;
 
 public class Util {
-    public static boolean levelLoaded = false;
 
     public static BlockState getColoredWoolForNormal(Vec3 normal) {
         // Extract the x and z components of the normal
@@ -134,18 +135,70 @@ public class Util {
         return averagedNormal.normalize();
     }
 
-    public static int getYValueAt(BlockPos pos, ServerLevel level) {
+    public static int getYValueAt(BlockPos blockPos, ServerLevel level) {
         //level.getChunk(pos).getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ());
         //NoiseBasedChunkGenerator generator = (NoiseBasedChunkGenerator) level.getChunkSource().getGenerator();
 
-        return level.getChunk(pos).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
-        //return generator.generatorSettings().get().noiseRouter().finalDensity().compute(new DensityFunction.SinglePointContext(pos.getX(), pos.getY(), pos.getZ()));
-    }
+        return level.getChunkSource().getChunkNow(blockPos.getX() >> 4, blockPos.getZ() >> 4).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos.getX(), blockPos.getZ());}
 
     public static int getYValueAt(int x, int z, ServerLevel level) {
-        BlockPos pos = new BlockPos(x, 0, z);
-        return level.getChunk(pos).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+        BlockPos blockPos = new BlockPos(x, 0, z);
+        return level.getChunkSource().getChunkNow(blockPos.getX() >> 4, blockPos.getZ() >> 4).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
     }
+
+    public static double getFinalDensityAt(BlockPos blockPos, ServerLevel level) {
+        NoiseBasedChunkGenerator generator = (NoiseBasedChunkGenerator) level.getChunkSource().getGenerator();
+        return generator.generatorSettings().get().noiseRouter().finalDensity().compute(new DensityFunction.SinglePointContext(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+    }
+
+    public static int getHeightFromDensity(int blockX, int blockZ, ServerLevel level)
+    {
+        int height = -1;
+        for (int y = level.getMaxBuildHeight()-1; y > 62; y--)
+        {
+            BlockPos cursorPos = new BlockPos(blockX, y, blockZ);
+
+            // Skip if Block is already air
+            // Might be faster than simply checking all noise values
+            if (level.getBlockState(cursorPos) != null && level.getBlockState(cursorPos) == Blocks.AIR.defaultBlockState()) {
+                //ChatMessageHandler.Send("Block at " + cursorPos.toString() + " is air! Skipping...", level);
+                continue;
+            }
+
+            double density = getFinalDensityAt(cursorPos, level);
+            //ChatMessageHandler.Send("Density at " + y + " is: " + Double.toString(density), level);
+            if (density > -0.4584d) // Air is -0.4583333333333333333, don't ask me why
+            {
+                height = y;
+                break;
+            }
+
+
+        }
+        return height;
+    }
+
+    public static BlockPos getLowestCircular(Vec3 center, int initialRadius, int samplingDirections, ServerLevel level)
+    {
+        BlockPos lowestPos = Util.Vec3ToBlockPos(center);
+        double angleStep = Math.toRadians(360.0 / samplingDirections);
+
+        for (int r = 0; r < samplingDirections; r++)
+        {
+            double finalAngle_rads = r * angleStep;
+            int posX = (int)Math.round(initialRadius * Math.cos(finalAngle_rads));
+            int posZ = (int)Math.round(initialRadius * Math.sin(finalAngle_rads));
+            int posY = getHeightFromDensity((int)center.x + posX, (int)center.z + posZ, level);  // Adjusted if needed
+
+            if (posY < lowestPos.getY())
+            {
+                lowestPos = new BlockPos((int)center.x + posX, posY, (int)center.z + posZ);
+            }
+        }
+
+        return lowestPos;
+    }
+
 
     public static String idFromXZ(BlockPos pos)
     {
@@ -167,6 +220,7 @@ public class Util {
     }
 
     public static void setBlock(ServerLevel level, BlockPos blockPos, Block block) {
-        level.setBlockAndUpdate(blockPos, block.defaultBlockState());
+        level.getChunkSource().getChunkNow(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+        level.setBlock(blockPos, block.defaultBlockState(), 3);
     }
 }

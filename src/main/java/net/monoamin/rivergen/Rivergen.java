@@ -23,6 +23,10 @@ public class Rivergen {
             () -> new DebugStickItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> DEBUG_GETFLOW = ITEMS.register("get_flow",
             () -> new DebugStickItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> DEBUG_GETLOWEST = ITEMS.register("get_lowest",
+            () -> new DebugStickItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> DEBUG_GETDENSITY= ITEMS.register("get_density",
+            () -> new DebugStickItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> DEBUG_GETACCUMULATION = ITEMS.register("get_accumulation",
             () -> new DebugStickItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> DEBUG_STARTGEN = ITEMS.register("start_gen",
@@ -49,7 +53,9 @@ public class Rivergen {
             event.accept(DEBUG_GETHEIGHT.get());
             event.accept(DEBUG_GETNORMAL.get());
             event.accept(DEBUG_GETFLOW.get());
+            event.accept(DEBUG_GETLOWEST.get());
             event.accept(DEBUG_GETACCUMULATION.get());
+            event.accept(DEBUG_GETDENSITY.get());
             event.accept(DEBUG_STARTGEN.get());
         }
     }

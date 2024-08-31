@@ -47,7 +47,7 @@ public class River {
             for (int x = -radius; x <= radius; x++) {
                 for (int z = -radius; z <= radius; z++) {
                     BlockPos cursorPos = new BlockPos((int) currentPoint.x + x, (int) currentPoint.y, (int) currentPoint.z + z);
-                    int yLevelAtCursor = Util.getYValueAt(cursorPos.getX(), cursorPos.getZ(), serverLevel.getServer().overworld());
+                    int yLevelAtCursor = Util.getHeightFromDensity(cursorPos.getX(), cursorPos.getZ(), serverLevel.getServer().overworld());
 
                     if (yLevelAtCursor < minElevation) {
                         minElevation = yLevelAtCursor;
@@ -59,6 +59,34 @@ public class River {
 
             if (stepped) {
                 nextPoint = candidatePoint;
+                break;
+            } else {
+                radius += stepRadiusMin;
+            }
+        }
+
+        if (stepped) {
+            riverPath.add(nextPoint);
+            segmentCount++;
+        } else {
+            finalized = true;
+        }
+    }
+
+    public void doStepAuto2() {
+        Vec3 currentPoint = riverPath.get(segmentCount);
+        Vec3 nextPoint = currentPoint;
+        boolean stepped = false;
+        int radius = stepRadiusMin;
+        while (radius <= stepRadiusMax && !stepped) {
+            nextPoint = currentPoint;
+            BlockPos lowestCircular = Util.getLowestCircular(currentPoint, radius, 8, serverLevel.getServer().overworld());
+            if (lowestCircular.getY() < currentPoint.y)
+            {
+                nextPoint = Util.BlockPosToVec3(lowestCircular);
+                stepped = true;
+            }
+            if (stepped) {
                 break;
             } else {
                 radius += stepRadiusMin;

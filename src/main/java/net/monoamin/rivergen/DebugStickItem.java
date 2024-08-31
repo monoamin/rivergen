@@ -57,7 +57,7 @@ public class DebugStickItem extends Item {
 
         switch (itemStack.getDescriptionId()){
             case "item.rivergen.get_height":
-                int height = Util.getYValueAt(blockPos, player.getServer().overworld());
+                int height = Util.getHeightFromDensity(blockPos.getX(), blockPos.getZ(), player.getServer().overworld());
                 ChatMessageHandler.Send("GetHeight used! Height is " + height, player.getServer().overworld());
                 break;
             case "item.rivergen.get_normal":
@@ -69,6 +69,10 @@ public class DebugStickItem extends Item {
                         Util.BlockPosToVec3(blockPos).add(normal),
                         0,255,0,255
                 );
+                break;
+            case "item.rivergen.get_lowest":
+                BlockPos pos = Util.getLowestCircular(Util.BlockPosToVec3(blockPos),3, 8,  player.getServer().overworld());
+                ChatMessageHandler.Send("GetLowest used! Lowest is " + pos.toString(), player.getServer().overworld());
                 break;
             case "item.rivergen.get_flow":
                 Vec3 flow = Util.getSmoothedNormalCorrect(blockPos, player.getServer().overworld(), 5).multiply(1,0,1).normalize();
@@ -89,6 +93,16 @@ public class DebugStickItem extends Item {
                         Util.BlockPosToVec3(blockPos).add(accumulation),
                         20,255,255,255
                 );
+                break;
+            case "item.rivergen.get_density":
+                Double density = Util.getFinalDensityAt(blockPos, player.getServer().overworld());
+                ChatMessageHandler.Send("GetDensity used! Normal is " + density.toString(), player.getServer().overworld());
+                /*RenderHandler.AddLineIfAbsent(
+                        "n"+Util.idFromXZ(blockPos),
+                        Util.BlockPosToVec3(blockPos),
+                        Util.BlockPosToVec3(blockPos).add(normal),
+                        0,255,0,255
+                );*/
                 break;
             case "item.rivergen.start_gen":
                 ChatMessageHandler.Send("StartGen used!", player.getServer().overworld());
