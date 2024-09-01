@@ -62,7 +62,7 @@ public class DebugStickItem extends Item {
                 break;
             case "item.rivergen.get_normal":
                 Vec3 normal = Util.getSmoothedNormalCorrect(blockPos, player.getServer().overworld(), 3);
-                ChatMessageHandler.Send("GetNormal used! Normal is " + normal.toString(), player.getServer().overworld());
+                ChatMessageHandler.Send("GetNormal used! Normal is " + normal, player.getServer().overworld());
                 RenderHandler.AddLineIfAbsent(
                         "n"+Util.idFromXZ(blockPos),
                         Util.BlockPosToVec3(blockPos),
@@ -76,7 +76,7 @@ public class DebugStickItem extends Item {
                 break;
             case "item.rivergen.get_flow":
                 Vec3 flow = Util.getSmoothedNormalCorrect(blockPos, player.getServer().overworld(), 5).multiply(1,0,1).normalize();
-                ChatMessageHandler.Send("GetFlow used! Flow is " + flow.toString(), player.getServer().overworld());
+                ChatMessageHandler.Send("GetFlow used! Flow is " + flow, player.getServer().overworld());
                 RenderHandler.AddLineIfAbsent(
                         "f"+Util.idFromXZ(blockPos),
                         Util.BlockPosToVec3(blockPos),
@@ -96,7 +96,7 @@ public class DebugStickItem extends Item {
                 break;
             case "item.rivergen.get_density":
                 Double density = Util.getFinalDensityAt(blockPos, player.getServer().overworld());
-                ChatMessageHandler.Send("GetDensity used! Normal is " + density.toString(), player.getServer().overworld());
+                ChatMessageHandler.Send("GetDensity used! Normal is " + density, player.getServer().overworld());
                 /*RenderHandler.AddLineIfAbsent(
                         "n"+Util.idFromXZ(blockPos),
                         Util.BlockPosToVec3(blockPos),

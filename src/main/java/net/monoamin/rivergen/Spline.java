@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Spline {
-    private List<SplineNode> nodes;
+    private final List<SplineNode> nodes;
 
     public Spline() {
         this.nodes = new ArrayList<>();

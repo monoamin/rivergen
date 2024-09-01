@@ -31,5 +31,13 @@ public class RivergenChunkGenerator extends NoiseBasedChunkGenerator {
     {
         // If chunk has deferred River update, process that before.
         super.applyCarvers(pLevel, pSeed, pRandom, pBiomeManager, pStructureManager, pChunk, pStep);
+
+
+    }
+
+    @Override
+    public void buildSurface(WorldGenRegion pLevel, StructureManager pStructureManagerm, RandomState pRandom, ChunkAccess pChunk)
+    {
+        super.buildSurface(pLevel, pStructureManagerm, pRandom, pChunk);
     }
 }

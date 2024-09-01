@@ -2,31 +2,21 @@ package net.monoamin.rivergen;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
-import net.minecraftforge.eventbus.api.IEventBus;
 
 import java.util.ArrayList;
 
 public class TerrainCarver {
 
-    private ServerLevel level; // Your Minecraft world object
-    private int channelRadius; // Radius of the channel's spherical cursor
+    private final ServerLevel level; // Your Minecraft world object
+    private final int channelRadiusMax; // Radius of the channel's spherical cursor
+    private final int channelRadiusMin;
 
-    public TerrainCarver(ServerLevel level, int channelRadius) {
+    public TerrainCarver(ServerLevel level, int channelRadiusMin, int channelRadiusMax) {
         this.level = level;
-        this.channelRadius = channelRadius;
+        this.channelRadiusMax = channelRadiusMax;
+        this.channelRadiusMin = channelRadiusMin;
     }
 
     public void carveChannel(ArrayList<Vec3> pathNodes) {
@@ -40,14 +30,16 @@ public class TerrainCarver {
 
             // Interpolate between start and end
             float distance = (float) start.distanceTo(end);
-            int numSteps = (int) (distance / (channelRadius / 2.0)); // Adjust steps based on radius
+            int numSteps = (int) (distance / (channelRadiusMax / 2.0)); // Adjust steps based on radius
 
             for (int step = 0; step <= numSteps; step++) {
                 float t = (float) step / numSteps;
                 Vec3 interpolatedPoint = lerp(start, end, t);
 
                 // Carve the terrain at the interpolated point
-                carveSphere(interpolatedPoint);
+                var normalizedStep = step / (float) pathNodes.size();
+                int targetRadius = Math.round(channelRadiusMin + normalizedStep * (channelRadiusMax - channelRadiusMin));
+                carveSphere(interpolatedPoint, targetRadius);
             }
         }
     }
@@ -59,31 +51,27 @@ public class TerrainCarver {
         return new Vec3(x, y, z);
     }
 
-    private void carveSphere(Vec3 center) {
-        int radiusSquared = channelRadius * channelRadius;
+    private void carveSphere(Vec3 center, int radius) {
+        int radiusSquared = radius * radius;
         BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
 
-        for (int x = -channelRadius; x <= channelRadius; x++) {
-            for (int y = -channelRadius; y <= channelRadius; y++) {
-                for (int z = -channelRadius; z <= channelRadius; z++) {
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = -radius; y <= radius; y++) {
+                for (int z = -radius; z <= radius; z++) {
                     if (x * x + y * y + z * z <= radiusSquared) {
                         blockPos.set(center.x + x, center.y + y, center.z + z);
-                        //if (level.getBlockState(blockPos) != Blocks.AIR.defaultBlockState()) {
-                            Util.setBlock(level.getServer().overworld(), blockPos, Blocks.AIR);
-                        //}
+                        Util.setBlock(level.getServer().overworld(), blockPos, Blocks.AIR);
                     }
                 }
             }
         }
 
-        for (int x = -channelRadius; x <= channelRadius; x++) {
-            for (int y = -channelRadius; y < 0; y++) {
-                for (int z = -channelRadius; z <= channelRadius; z++) {
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = -radius; y < 0; y++) {
+                for (int z = -radius; z <= radius; z++) {
                     if (x * x + y * y + z * z <= radiusSquared) {
                         blockPos.set(center.x + x, center.y + y, center.z + z);
-                        //if (level.getBlockState(blockPos) != Blocks.AIR.defaultBlockState()) {
                         Util.setBlock(level.getServer().overworld(), blockPos, Blocks.WATER);
-                        //}
                     }
                 }
             }

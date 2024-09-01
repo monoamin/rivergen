@@ -10,6 +10,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.Random;
+
 public class Util {
 
     public static BlockState getColoredWoolForNormal(Vec3 normal) {
@@ -222,5 +224,21 @@ public class Util {
     public static void setBlock(ServerLevel level, BlockPos blockPos, Block block) {
         level.getChunkSource().getChunkNow(blockPos.getX() >> 4, blockPos.getZ() >> 4);
         level.setBlock(blockPos, block.defaultBlockState(), 3);
+    }
+
+    public static BlockPos getRandomXZWithinCircle(int centerX, int centerZ, double minDistance, double maxDistance, ServerLevel level) {
+        Random random = new Random();
+
+        // Generate a random angle between 0 and 2π
+        double angle = random.nextDouble() * 2 * Math.PI;
+
+        // Generate a random distance between minDistance and maxDistance
+        double distance = minDistance + (random.nextDouble() * (maxDistance - minDistance));
+
+        // Calculate the new X and Z coordinates
+        int x = centerX + (int)(distance * Math.cos(angle));
+        int z = centerZ + (int)(distance * Math.sin(angle));
+
+        return new BlockPos(x, getHeightFromDensity(x, z, level.getServer().overworld()), z);
     }
 }

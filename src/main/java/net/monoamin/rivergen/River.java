@@ -10,12 +10,12 @@ import java.util.Stack;
 
 public class River {
     //private HashMap<Vec3, Integer> riverPath;
-    private ArrayList<Vec3> riverPath;
+    private final ArrayList<Vec3> riverPath;
     private int segmentCount;
     private String id;
-    private int stepRadiusMax = 32;
-    private int stepRadiusMin = 1;
-    private double forceStepMinSlope = 0.5;
+    private final int stepRadiusMax = 32;
+    private final int stepRadiusMin = 1;
+    private final double forceStepMinSlope = 0.5;
     ServerLevel serverLevel;
 
     public boolean finalized = false;
