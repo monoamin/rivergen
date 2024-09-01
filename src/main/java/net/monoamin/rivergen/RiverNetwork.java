@@ -1,13 +1,9 @@
 package net.monoamin.rivergen;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.levelgen.DensityFunctions;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Stack;
 
 public class RiverNetwork {
 
@@ -27,7 +23,7 @@ public class RiverNetwork {
 
         while (!river.finalized)
         {
-            river.doStepAuto2();
+            river.doStepAuto();
         }
 
 

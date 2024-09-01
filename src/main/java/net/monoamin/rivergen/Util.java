@@ -180,6 +180,11 @@ public class Util {
         return height;
     }
 
+    public static int getHeightFromDensity(Vec3 pos, ServerLevel level)
+    {
+        return getHeightFromDensity((int)Math.round(pos.x), (int)Math.round(pos.z), level);
+    }
+
     public static BlockPos getLowestCircular(Vec3 center, int initialRadius, int samplingDirections, ServerLevel level)
     {
         BlockPos lowestPos = Util.Vec3ToBlockPos(center);

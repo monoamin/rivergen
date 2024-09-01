@@ -12,10 +12,11 @@ import net.minecraftforge.fml.common.Mod;
 import org.joml.Matrix4f;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Mod.EventBusSubscriber(modid = "rivergen")
 public class RenderHandler {
-    public static Map<String, LineData> solutionSet = new HashMap<>();
+    public static Map<String, LineData> solutionSet = new ConcurrentHashMap<>();
 
     @SubscribeEvent
     public static void onRenderLevelStageEvent(RenderLevelStageEvent event) {

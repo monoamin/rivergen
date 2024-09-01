@@ -31,7 +31,7 @@ public class RivergenHandler {
 
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent event) {
-        tickCounter++;
+        /*tickCounter++;
         if (tickCounter % 200 == 0) { // Once per 10s
             if (world_isLoaded) {
                 for (ServerPlayer player : serverLevel.getServer().getPlayerList().getPlayers()) {
@@ -45,7 +45,7 @@ public class RivergenHandler {
                 }
             }
             tickCounter = 0;
-        }
+        }*/
     }
 
     @SubscribeEvent
@@ -62,7 +62,8 @@ public class RivergenHandler {
 
     public static void traceRiver(BlockPos blockPos) {
         //ChatMessageHandler.Send("Running...", serverLevel);
-        River r = riverNetwork.start(Util.BlockPosToVec3(blockPos), true);
-        terrainCarver.carveChannel(r.getPath());
+        River r = riverNetwork.start(Util.BlockPosToVec3(blockPos), false);
+        Spline s = new Spline(r.getPath());
+        terrainCarver.carveChannelSpline(s.generateSplinePoints(10));
     }
 }

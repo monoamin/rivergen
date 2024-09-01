@@ -1,5 +1,7 @@
 package net.monoamin.rivergen;
 
+import net.minecraft.world.phys.Vec3;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +10,12 @@ public class Spline {
 
     public Spline() {
         this.nodes = new ArrayList<>();
+    }
+    public Spline(ArrayList<Vec3> points) {
+        this.nodes = new ArrayList<>();
+        for (Vec3 point: points) {
+            nodes.add(new SplineNode(point));
+        }
     }
 
     public void addNode(SplineNode node) {
@@ -35,20 +43,20 @@ public class Spline {
         SplineNode P3 = nodes.get(segment + 3);
 
         // Catmull-Rom spline formula
-        float t2 = localT * localT;
-        float t3 = t2 * localT;
+        double t2 = localT * localT;
+        double t3 = t2 * localT;
 
-        float x = 0.5f * (2 * P1.x +
+        double x = 0.5f * (2 * P1.x +
                 (-P0.x + P2.x) * localT +
                 (2 * P0.x - 5 * P1.x + 4 * P2.x - P3.x) * t2 +
                 (-P0.x + 3 * P1.x - 3 * P2.x + P3.x) * t3);
 
-        float y = 0.5f * (2 * P1.y +
+        double y = 0.5f * (2 * P1.y +
                 (-P0.y + P2.y) * localT +
                 (2 * P0.y - 5 * P1.y + 4 * P2.y - P3.y) * t2 +
                 (-P0.y + 3 * P1.y - 3 * P2.y + P3.y) * t3);
 
-        float z = 0.5f * (2 * P1.z +
+        double z = 0.5f * (2 * P1.z +
                 (-P0.z + P2.z) * localT +
                 (2 * P0.z - 5 * P1.z + 4 * P2.z - P3.z) * t2 +
                 (-P0.z + 3 * P1.z - 3 * P2.z + P3.z) * t3);
