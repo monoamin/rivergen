@@ -13,10 +13,11 @@ public class River {
     private final ArrayList<Vec3> riverPath;
     private int segmentCount;
     private String id;
-    private final int stepRadiusMax = 64;
+    private final int stepRadiusMax = 128;
     private final int stepRadiusMin = 16;
     private final int maxStraightDistance = 128;
-    private final double forceStepMinSlope = 0.0001;
+    private final double forceStepMinSlope = 0;
+    private int straightSteps = 0;
     ServerLevel serverLevel;
 
     public boolean finalized = false;
@@ -40,35 +41,29 @@ public class River {
         Vec3 nextPoint = currentPoint;
         boolean stepped = false;
         int radius = stepRadiusMin;
-        while (radius <= stepRadiusMax && !stepped && currentPoint.y > 62) {
+        while (radius <= stepRadiusMax && !stepped && currentPoint.y > 62 && segmentCount < 100) {
             nextPoint = currentPoint;
-
+            Vec3 directionalBias = Vec3.ZERO;
             if (segmentCount > 1) {
-                // Step on even terrain for a maximum distance
-                Vec3 directionalBias = currentPoint.subtract(riverPath.get(segmentCount - 1)).multiply(1, forceStepMinSlope, 1).normalize();
-                Vec3 straightCandidate;
-
-                // Step straight only if we didn't do so in the last segment
-                if ( directionalBias.y > -0.1 && directionalBias.y < 0.1) {
-                    for (int i = 1; i <= maxStraightDistance; i++) {
-                        straightCandidate = currentPoint.add(directionalBias.multiply(i, i, i));
-                        if (TerrainUtils.getYValueAt((int) straightCandidate.x, (int) straightCandidate.z) == currentPoint.y) {
-                            nextPoint = straightCandidate;
-                            stepped = true;
-                            break;
-                        }
-                    }
-                }
+                directionalBias = currentPoint.subtract(riverPath.get(segmentCount - 1)).multiply(1, forceStepMinSlope, 1).normalize();
             }
 
-                // Otherwise step to the lowest neighbor in range
-                if (!stepped) {
-                    BlockPos lowestCircular = TerrainUtils.getLowestCircular(currentPoint, radius, 36);
-                    if (lowestCircular.getY() < currentPoint.y) {
-                        nextPoint = TerrainUtils.BlockPosToVec3(lowestCircular);
-                        stepped = true;
-                    }
-                }
+            if (!stepped) {
+                Vec3 flowDirection = TerrainUtils.getWeightedDirectionTowardsLowest(currentPoint, radius, 36).normalize();
+                Vec3 finalDirection = TerrainUtils.blendVec3(flowDirection, directionalBias, 0.5);
+                Vec3 stepCandidate = currentPoint.add(flowDirection.multiply(radius, 1.0, radius));
+                int yValue = TerrainUtils.getYValueAt(stepCandidate);
+                if (yValue < currentPoint.y) {
+                    stepCandidate = stepCandidate.multiply(1,0,1).add(0,yValue,0);
+                    nextPoint = stepCandidate;
+                    stepped = true;
+                    //straightSteps = 0;
+                /*} else if (yValue == currentPoint.y) {
+                    nextPoint = stepCandidate;
+                    stepped = true;
+                    straightSteps++;
+                */}
+            }
 
             // If stepped at all continue with next segment
             if (stepped) {
@@ -80,10 +75,10 @@ public class River {
 
         if (stepped) {
             riverPath.add(nextPoint);
-            //RenderHandler.AddLineIfAbsent("line-"+TerrainUtils.idFromVec3(currentPoint), currentPoint, nextPoint, 50, 100, 255, 255);
             segmentCount++;
         } else {
             finalized = true;
+            // TODO: Add another 2 segments as padding to keep the path after catmull-rom interpolation
         }
     }
 

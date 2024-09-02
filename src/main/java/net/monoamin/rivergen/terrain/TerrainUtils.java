@@ -93,6 +93,10 @@ public class TerrainUtils {
         return averagedNormal.normalize();
     }
 
+    public static int getYValueAt(Vec3 vec3) {
+        return getYValueAt((int)vec3.x, (int)vec3.z);
+    }
+
     public static int getYValueAt(BlockPos blockPos) {
         return getYValueAt(blockPos.getX(), blockPos.getZ());
     }
@@ -138,6 +142,40 @@ public class TerrainUtils {
         return lowestPos;
     }
 
+    public static Vec3 getWeightedDirectionTowardsLowest(Vec3 center, int initialRadius, int samplingDirections) {
+        Vec3 weightedDirection = new Vec3(0, 0, 0); // Initialize a zero vector
+        double angleStep = Math.toRadians(360.0 / samplingDirections);
+        double totalWeight = 0;
+
+        for (int r = 0; r < samplingDirections; r++) {
+            double finalAngle_rads = r * angleStep;
+            int posX = (int) Math.round(initialRadius * Math.cos(finalAngle_rads));
+            int posZ = (int) Math.round(initialRadius * Math.sin(finalAngle_rads));
+            int posY = getYValueAt((int) center.x + posX, (int) center.z + posZ);
+
+            // Calculate the difference in height relative to the center
+            int heightDifference = (int) center.y - posY;
+
+            // If the sampled point is lower, it has a higher influence
+            if (heightDifference > 0) {
+                // Compute the direction vector from the center to the current sampled point
+                Vec3 direction = new Vec3(posX, 0, posZ).normalize(); // Ignore the Y component for direction
+
+                // Weight this direction by the height difference and add it to the weighted direction
+                weightedDirection = weightedDirection.add(direction.scale(heightDifference));
+                totalWeight += heightDifference;
+            }
+        }
+
+        // Normalize the weighted direction to get the final direction vector
+        if (totalWeight > 0) {
+            weightedDirection = weightedDirection.scale(1.0 / totalWeight);
+        }
+
+        return weightedDirection.normalize();
+    }
+
+
 
     public static String idFromXZ(BlockPos pos) {
         return String.format("%05d", pos.getX()) + String.format("%05d", pos.getZ());
@@ -175,5 +213,16 @@ public class TerrainUtils {
         int z = centerZ + (int)(distance * Math.sin(angle));
 
         return new BlockPos(x, getYValueAt(x, z), z);
+    }
+
+    public static Vec3 blendVec3(Vec3 directionA, Vec3 directionBias, double biasFactor) {
+        // Ensure the bias factor is within the range [0, 1]
+        biasFactor = Math.max(0, Math.min(1, biasFactor));
+
+        // Calculate the blended vector
+        Vec3 blendedVec = directionA.scale(1 - biasFactor).add(directionBias.scale(biasFactor));
+
+        // Optionally normalize the blended vector if you want a unit vector
+        return blendedVec.normalize();
     }
 }
