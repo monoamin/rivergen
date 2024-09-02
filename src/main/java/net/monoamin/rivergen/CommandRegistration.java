@@ -8,13 +8,11 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-
-import java.util.function.Supplier;
+import net.monoamin.rivergen.gen.RiverGenerationHandler;
+import net.monoamin.rivergen.terrain.TerrainUtils;
 
 @Mod.EventBusSubscriber(modid = "rivergen")
 public class CommandRegistration {
@@ -40,9 +38,9 @@ public class CommandRegistration {
         String zVal = StringArgumentType.getString(context, "z");
         int x = Integer.parseInt(xVal);
         int z = Integer.parseInt(zVal);
-        int height = Util.getHeightFromDensity(x, z, context.getSource().getLevel().getServer().overworld());
+        int height = TerrainUtils.getYValueAt(x, z);
         BlockPos riverPos = new BlockPos(x, height, z);
-        RivergenHandler.traceRiver(riverPos);
+        RiverGenerationHandler.traceRiver(riverPos);
         context.getSource().sendSuccess(() -> Component.literal("River generated at: " + xVal + " " +zVal), false);
         return 1;
     }

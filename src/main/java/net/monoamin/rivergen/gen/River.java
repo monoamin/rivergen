@@ -1,8 +1,10 @@
-package net.monoamin.rivergen;
+package net.monoamin.rivergen.gen;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
+import net.monoamin.rivergen.render.RenderHandler;
+import net.monoamin.rivergen.terrain.TerrainUtils;
 
 import java.util.ArrayList;
 
@@ -43,23 +45,27 @@ public class River {
 
             if (segmentCount > 1) {
                 // Step on even terrain for a maximum distance
-                Vec3 directionalBias = currentPoint.subtract(riverPath.get(segmentCount - 1)).multiply(1, 0, 1).normalize();
+                Vec3 directionalBias = currentPoint.subtract(riverPath.get(segmentCount - 1)).multiply(1, 0.01, 1).normalize();
                 Vec3 straightCandidate;
-                for (int i = 1; i <= maxStraightDistance; i++) {
-                    straightCandidate = currentPoint.add(directionalBias.multiply(i, 1, i));
-                    if (Util.getHeightFromDensity((int) straightCandidate.x, (int) straightCandidate.z, serverLevel.getServer().overworld()) == currentPoint.y) {
-                        nextPoint = straightCandidate;
-                        stepped = true;
-                        break;
+
+                // Step straight only if we didn't do so in the last segment
+                if ( directionalBias.y > -0.1 && directionalBias.y < 0.1) {
+                    for (int i = 1; i <= maxStraightDistance; i++) {
+                        straightCandidate = currentPoint.add(directionalBias.multiply(i, i, i));
+                        if (TerrainUtils.getYValueAt((int) straightCandidate.x, (int) straightCandidate.z) == currentPoint.y) {
+                            nextPoint = straightCandidate;
+                            stepped = true;
+                            break;
+                        }
                     }
                 }
             }
 
                 // Otherwise step to the lowest neighbor in range
                 if (!stepped) {
-                    BlockPos lowestCircular = Util.getLowestCircular(currentPoint, radius, 16, serverLevel.getServer().overworld());
+                    BlockPos lowestCircular = TerrainUtils.getLowestCircular(currentPoint, radius, 36);
                     if (lowestCircular.getY() < currentPoint.y) {
-                        nextPoint = Util.BlockPosToVec3(lowestCircular);
+                        nextPoint = TerrainUtils.BlockPosToVec3(lowestCircular);
                         stepped = true;
                     }
                 }
@@ -74,6 +80,7 @@ public class River {
 
         if (stepped) {
             riverPath.add(nextPoint);
+            //RenderHandler.AddLineIfAbsent("line-"+TerrainUtils.idFromVec3(currentPoint), currentPoint, nextPoint, 50, 100, 255, 255);
             segmentCount++;
         } else {
             finalized = true;

@@ -1,8 +1,8 @@
-package net.monoamin.rivergen;
+package net.monoamin.rivergen.render;
 
 import net.minecraft.world.phys.Vec3;
 
-public class LineData {
+public class RenderedLine {
     private final Vec3 start;
     private final Vec3 end;
     private final int red;
@@ -10,7 +10,7 @@ public class LineData {
     private final int blue;
     private final int alpha;
 
-    public LineData(Vec3 start, Vec3 end, int red, int green, int blue, int alpha) {
+    public RenderedLine(Vec3 start, Vec3 end, int red, int green, int blue, int alpha) {
         this.start = start;
         this.end = end;
         this.red = red;
