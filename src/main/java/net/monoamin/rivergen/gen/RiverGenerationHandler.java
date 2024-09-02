@@ -51,7 +51,7 @@ public class RiverGenerationHandler {
             world_isLoaded = true;
             //erosionDataHolder = new ErosionDataHolder(level, true);
             riverNetwork = new RiverNetwork(serverLevel, true);
-            terrainCarver = new TerrainCarver(serverLevel, 3, 5);
+            terrainCarver = new TerrainCarver(serverLevel, 3, 8);
             DebugMessage.Send("Loaded.", serverLevel);
         }
     }
@@ -62,7 +62,7 @@ public class RiverGenerationHandler {
 
         if (r.length() >= 4) {
             Spline s = new Spline(r.getPath());
-            terrainCarver.carveChannelSpline(s.generateSplinePoints(10));
+            terrainCarver.carveChannelSpline(s.generateSplinePoints(20));
         }
         else{
             terrainCarver.carveChannel(r.getPath());

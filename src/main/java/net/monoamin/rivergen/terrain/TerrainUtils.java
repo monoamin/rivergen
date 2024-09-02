@@ -157,7 +157,7 @@ public class TerrainUtils {
     }
 
     public static void setBlock(BlockPos blockPos, Block block) {
-        RiverGenerationHandler.serverLevel.getChunkSource().getChunkNow(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+        //RiverGenerationHandler.serverLevel.getChunkSource().getChunkNow(blockPos.getX() >> 4, blockPos.getZ() >> 4);
         RiverGenerationHandler.serverLevel.setBlock(blockPos, block.defaultBlockState(), 3);
     }
 

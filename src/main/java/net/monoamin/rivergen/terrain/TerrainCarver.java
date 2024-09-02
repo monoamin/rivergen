@@ -124,7 +124,8 @@ public class TerrainCarver {
         for (int x = -radius; x <= radius; x++) {
             for (int y = -radius; y < 0; y++) {
                 for (int z = -radius; z <= radius; z++) {
-                    if (x * x + y * y + z * z <= radiusSquared) {
+                    int j = x * x + y * y + z * z;
+                    if ((j <= radiusSquared) && (j >= channelRadiusMin/2)) {
                         blockPos.set(center.x + x, center.y + y, center.z + z);
                         TerrainUtils.setBlock(blockPos, Blocks.WATER);
                     }

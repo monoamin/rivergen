@@ -15,8 +15,8 @@ public class River {
     private String id;
     private final int stepRadiusMax = 64;
     private final int stepRadiusMin = 16;
-    private final int maxStraightDistance = 64;
-    private final double forceStepMinSlope = 0.5;
+    private final int maxStraightDistance = 128;
+    private final double forceStepMinSlope = 0.0001;
     ServerLevel serverLevel;
 
     public boolean finalized = false;
@@ -45,7 +45,7 @@ public class River {
 
             if (segmentCount > 1) {
                 // Step on even terrain for a maximum distance
-                Vec3 directionalBias = currentPoint.subtract(riverPath.get(segmentCount - 1)).multiply(1, 0.01, 1).normalize();
+                Vec3 directionalBias = currentPoint.subtract(riverPath.get(segmentCount - 1)).multiply(1, forceStepMinSlope, 1).normalize();
                 Vec3 straightCandidate;
 
                 // Step straight only if we didn't do so in the last segment
