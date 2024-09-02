@@ -28,6 +28,9 @@ Rivers must be constructed in their entirety and not simply inferred from local 
   2. The player ventures away from the area and returns later, expecting to find a river.
   3. However, the river is missing because the generation intent was never propagated beyond the immediate neighboring chunks.
 
+![grafik](https://github.com/user-attachments/assets/8e4dc8a8-8637-4718-9b0d-fe496f3ac0f9)
+
+
 - **Resolution:**
   To resolve this paradox, river paths must be fully constructed when first identified, rather than being generated only as needed. This ensures that when the player returns to any part of the river, the entire river path has already been generated, preserving consistency and discoverability.
 
@@ -43,6 +46,9 @@ A practical approach to generating rivers involves hooking into the erosion step
 
 #### **Tendrils of Chunk Generation:**
 The concept of "tendrils" of chunk generation refers to the necessary extension of chunk generation beyond the player's immediate surroundings. This is crucial for ensuring that river paths can be traced and generated across large distances without interruption.
+
+![grafik](https://github.com/user-attachments/assets/1a6d757e-977b-4d6a-a333-08e4b90f80c2)
+
 
 **Key Considerations:**
 - **Performance Impact:** While generating chunks outside the immediate render distance is necessary for complete river paths, it should be done with careful consideration of performance. This might involve generating only the minimal necessary terrain or using lower detail levels for distant chunks.
