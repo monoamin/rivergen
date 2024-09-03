@@ -247,5 +247,34 @@ public class TerrainCarver {
         }
     }
 
+    private void carveGaussianChannel(Vec3 center, int maxRadius, int heightOffset, int heightAboveCenter, Block block, Block ifNotBlock) {
+    BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
+
+    // Define the coefficient for the Gaussian falloff (inverse bell curve)
+    float bellCoefficient = 4.0f / (maxRadius * maxRadius); // Adjust this coefficient to control the curve's width
+
+    for (int x = -maxRadius; x <= maxRadius; x++) {
+        for (int z = -maxRadius; z <= maxRadius; z++) {
+            // Calculate the squared distance from the center horizontally
+            int distanceSquared = x * x + z * z;
+
+            if (distanceSquared <= maxRadius * maxRadius) {
+                // Calculate the depth using the inverse bell curve (Gaussian function)
+                float normalizedDistance = (float) distanceSquared / (maxRadius * maxRadius);
+                int depth = Math.round(maxRadius * (1.0f - (float) Math.exp(-bellCoefficient * distanceSquared)));
+
+                // Adjust carving range to reach above the center
+                for (int y = -depth; y <= heightAboveCenter + heightOffset; y++) {
+                    blockPos.set(center.x + x, center.y + y, center.z + z);
+                    if (level.getBlockState(blockPos) != ifNotBlock.defaultBlockState()) {
+                        TerrainUtils.setBlock(blockPos, block);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 
 }
