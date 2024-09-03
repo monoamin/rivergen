@@ -176,15 +176,6 @@ public class TerrainUtils {
     }
 
 
-
-    public static String idFromXZ(BlockPos pos) {
-        return String.format("%05d", pos.getX()) + String.format("%05d", pos.getZ());
-    }
-
-    public static String idFromVec3(Vec3 vec) {
-        return String.format("%08d", (int)vec.x) + String.format("%08d", (int)vec.y) + String.format("%08d", (int)vec.z);
-    }
-
     public static Vec3 BlockPosToVec3(BlockPos pos)
     {
         return new Vec3(pos.getX(), pos.getY(), pos.getZ());

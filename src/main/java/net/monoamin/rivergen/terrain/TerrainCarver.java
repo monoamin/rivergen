@@ -117,7 +117,7 @@ public class TerrainCarver {
         for (int i = 0; i < splineNodes.size() - 1; i++) {
 
             if(i>0) {
-                RenderHandler.AddLineIfAbsent("spline-"+ TerrainUtils.idFromVec3(splineNodes.get(i).vec3()), splineNodes.get(i - 1).vec3(), splineNodes.get(i).vec3(), 255, 100, 180, 255);
+                RenderHandler.AddLineIfAbsent("spline-"+ splineNodes.get(i).vec3().toString(), splineNodes.get(i - 1).vec3(), splineNodes.get(i).vec3(), 255, 100, 180, 255);
             }
 
             Vec3 start = splineNodes.get(i).vec3();

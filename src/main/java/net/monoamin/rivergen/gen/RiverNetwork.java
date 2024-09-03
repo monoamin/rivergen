@@ -20,7 +20,7 @@ public class RiverNetwork {
     }
 
     public River traceRiverFrom(Vec3 startCoordinate, boolean drawLines) {
-        River river = new River(startCoordinate, TerrainUtils.idFromVec3(startCoordinate), serverLevel);
+        River river = new River(startCoordinate, startCoordinate.toString(), serverLevel);
         while (!river.finalized)
         {
             river.doStepAuto();
