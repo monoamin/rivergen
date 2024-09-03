@@ -1,13 +1,16 @@
-package net.monoamin.rivergen;
+package net.monoamin.rivergen.gen;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
+import net.monoamin.rivergen.render.RenderHandler;
+import net.monoamin.rivergen.debug.DebugMessage;
+import net.monoamin.rivergen.terrain.TerrainUtils;
 
 import java.util.HashMap;
 import java.util.Stack;
 
-public class FluidGrid {
+public class ErosionDataHolder {
 
     // Stores surface normals at each BlockPos
     HashMap<BlockPos, Vec3> normals;
@@ -25,7 +28,7 @@ public class FluidGrid {
 
     Boolean lines = false;
 
-    public FluidGrid(ServerLevel level, boolean drawLines) {
+    public ErosionDataHolder(ServerLevel level, boolean drawLines) {
         // Initialize data structures
         normals = new HashMap<>();
         accumulations = new HashMap<>();
@@ -46,7 +49,7 @@ public class FluidGrid {
 
             if (accumulationProcessingStack.size() == 50)
             {
-                ChatMessageHandler.Send("Stopped due to: stack = max stack size", serverLevel);
+                DebugMessage.Send("Stopped due to: stack = max stack size", serverLevel);
                 accumulationProcessingStack.clear();
             }
         }
@@ -72,7 +75,7 @@ public class FluidGrid {
                 // Process the neighbors for normal and flow calculation
                 for (int[] offset : offsets) {
                     BlockPos cursorPos = pos.offset(offset[0], 0, offset[1]);
-                    BlockPos surfacePosAtCursor = new BlockPos(cursorPos.getX(), Util.getYValueAt(cursorPos, serverLevel), cursorPos.getZ());
+                    BlockPos surfacePosAtCursor = new BlockPos(cursorPos.getX(), TerrainUtils.getYValueAt(cursorPos), cursorPos.getZ());
                     if (!normals.containsKey(surfacePosAtCursor)) {
                         calculateNormalAndFlow(surfacePosAtCursor, drawLines);
                     }
@@ -83,7 +86,7 @@ public class FluidGrid {
                 // Look at all neighbors and accumulate their flow if their flow intersects with this point
                 for (int[] offset : offsets) {
                     BlockPos cursorPos = pos.offset(offset[0], 0, offset[1]);
-                    BlockPos surfacePosAtCursor = new BlockPos(cursorPos.getX(), Util.getYValueAt(cursorPos, serverLevel), cursorPos.getZ());
+                    BlockPos surfacePosAtCursor = new BlockPos(cursorPos.getX(), TerrainUtils.getYValueAt(cursorPos), cursorPos.getZ());
 
                     // Calculate flow contribution from neighbor
                     Vec3 neighborFlow = flows.get(surfacePosAtCursor);
@@ -96,7 +99,7 @@ public class FluidGrid {
                         if (!accumulations.containsKey(cursorPos)) {
                             accumulationProcessingStack.push(cursorPos);
 
-                            ChatMessageHandler.Send("Adding required neighbor at " + offset[0] + "," + offset[1] + " to the queue", serverLevel);
+                            DebugMessage.Send("Adding required neighbor at " + offset[0] + "," + offset[1] + " to the queue", serverLevel);
 
                             continue;  // Process the neighbor before continuing
                         }
@@ -122,9 +125,9 @@ public class FluidGrid {
         //Vec3 vec_pos = new Vec3(pos.getX(), 0d, pos.getZ());
 
         // Calculate smoothed normal
-        Vec3 n_pos = Util.getSmoothedNormalCorrect(pos, serverLevel.getServer().overworld(), 5);
+        Vec3 n_pos = TerrainUtils.getSmoothedNormalCorrect(pos, 5);
 
-        //BlockPos surfacePosAtCursor = new BlockPos(pos.getX(), Util.getYValueAt(pos, serverLevel.getServer().overworld()), pos.getZ());
+        //BlockPos surfacePosAtCursor = new BlockPos(pos.getX(), TerrainUtils.getYValueAt(pos, serverLevel.getServer().overworld()), pos.getZ());
 
         // Calculate flow direction from the normal (projecting to the xz-plane)
         Vec3 f_pos = new Vec3(n_pos.x, 0d, n_pos.z).normalize();
@@ -134,19 +137,19 @@ public class FluidGrid {
         flows.put(pos, f_pos);
 
         if (drawLines) {
-            //ChatMessageHandler.Send(vec_pos.toString() + " | " + n_pos.toString(), serverLevel);
+            //DebugMessage.Send(vec_pos.toString() + " | " + n_pos.toString(), serverLevel);
 
             RenderHandler.AddLineIfAbsent(
-                    "n"+Util.idFromXZ(pos),
-                    Util.BlockPosToVec3(pos),
-                    Util.BlockPosToVec3(pos).add(n_pos),
+                    "n"+ TerrainUtils.idFromXZ(pos),
+                    TerrainUtils.BlockPosToVec3(pos),
+                    TerrainUtils.BlockPosToVec3(pos).add(n_pos),
                     0,255,0,255
             );
 
             RenderHandler.AddLineIfAbsent(
-                    "f"+Util.idFromXZ(pos),
-                    Util.BlockPosToVec3(pos),
-                    Util.BlockPosToVec3(pos).add(f_pos),
+                    "f"+ TerrainUtils.idFromXZ(pos),
+                    TerrainUtils.BlockPosToVec3(pos),
+                    TerrainUtils.BlockPosToVec3(pos).add(f_pos),
                     0,0,255,255
             );
         }

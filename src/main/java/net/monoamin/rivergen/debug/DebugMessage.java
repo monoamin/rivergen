@@ -1,4 +1,4 @@
-package net.monoamin.rivergen;
+package net.monoamin.rivergen.debug;
 
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.OutgoingChatMessage;
@@ -6,7 +6,7 @@ import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
-public class ChatMessageHandler {
+public class DebugMessage {
 
     public static void Send(String message, ServerLevel level)
     {

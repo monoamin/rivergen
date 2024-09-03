@@ -1,14 +1,27 @@
-package net.monoamin.rivergen;
+package net.monoamin.rivergen.spline;
+
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Objects;
 
 public class SplineNode {
-    public float x, y, z;
+    public double x, y, z;
 
-    public SplineNode(float x, float y, float z) {
+    public Vec3 vec3()
+    {
+        return new Vec3(x,y,z);
+    }
+
+    public SplineNode(double x, double y, double z) {
         this.x = x;
         this.y = y;
         this.z = z;
+    }
+
+    public SplineNode(Vec3 vec) {
+        this.x = vec.x;
+        this.y = vec.y;
+        this.z = vec.z;
     }
 
     // Helper method to add two SplineNodes
@@ -36,9 +49,9 @@ public class SplineNode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SplineNode that = (SplineNode) o;
-        return Float.compare(that.x, x) == 0 &&
-                Float.compare(that.y, y) == 0 &&
-                Float.compare(that.z, z) == 0;
+        return Double.compare(that.x, x) == 0 &&
+                Double.compare(that.y, y) == 0 &&
+                Double.compare(that.z, z) == 0;
     }
 
     @Override

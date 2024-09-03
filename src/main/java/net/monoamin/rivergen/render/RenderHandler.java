@@ -1,4 +1,4 @@
-package net.monoamin.rivergen;
+package net.monoamin.rivergen.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -10,12 +10,13 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Matrix4f;
-import java.util.HashMap;
+
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Mod.EventBusSubscriber(modid = "rivergen")
 public class RenderHandler {
-    public static Map<String, LineData> solutionSet = new HashMap<>();
+    public static Map<String, RenderedLine> solutionSet = new ConcurrentHashMap<>();
 
     @SubscribeEvent
     public static void onRenderLevelStageEvent(RenderLevelStageEvent event) {
@@ -30,14 +31,14 @@ public class RenderHandler {
 
         VertexConsumer consumer = bufSource.getBuffer(RenderType.lines());  // Move outside the loop
 
-        for (Map.Entry<String, LineData> entry : solutionSet.entrySet()) {
-            LineData lineData = entry.getValue();
-            Vec3 start = lineData.getStart();
-            Vec3 end = lineData.getEnd();
+        for (Map.Entry<String, RenderedLine> entry : solutionSet.entrySet()) {
+            RenderedLine renderedLine = entry.getValue();
+            Vec3 start = renderedLine.getStart();
+            Vec3 end = renderedLine.getEnd();
 
             // Define the two points for the line with the specified color
-            definePoint(consumer, matrix, start, lineData);
-            definePoint(consumer, matrix, end, lineData);
+            definePoint(consumer, matrix, start, renderedLine);
+            definePoint(consumer, matrix, end, renderedLine);
         }
 
         bufSource.endBatch();  // Ensure this is called after all lines are defined
@@ -46,12 +47,12 @@ public class RenderHandler {
     }
 
     public static void AddLineIfAbsent(String label, Vec3 a, Vec3 b, int red, int green, int blue, int alpha) {
-        solutionSet.putIfAbsent(label, new LineData(a, b, red, green, blue, alpha));
+        solutionSet.putIfAbsent(label, new RenderedLine(a, b, red, green, blue, alpha));
     }
 
-    public static void definePoint(VertexConsumer consumer, Matrix4f matrix, Vec3 p, LineData lineData) {
+    public static void definePoint(VertexConsumer consumer, Matrix4f matrix, Vec3 p, RenderedLine renderedLine) {
         consumer.vertex(matrix, (float) p.x + 0.5f, (float) p.y + 0.5f, (float) p.z + 0.5f)
-                .color(lineData.getRed(), lineData.getGreen(), lineData.getBlue(), lineData.getAlpha())
+                .color(renderedLine.getRed(), renderedLine.getGreen(), renderedLine.getBlue(), renderedLine.getAlpha())
                 .normal(0, 1, 0)
                 .endVertex();
     }
