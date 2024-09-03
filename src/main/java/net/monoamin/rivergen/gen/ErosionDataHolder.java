@@ -10,6 +10,8 @@ import net.monoamin.rivergen.terrain.TerrainUtils;
 import java.util.HashMap;
 import java.util.Stack;
 
+/** Class to hold data for finite context erosion simulation
+ */
 public class ErosionDataHolder {
 
     // Stores surface normals at each BlockPos
@@ -140,14 +142,14 @@ public class ErosionDataHolder {
             //DebugMessage.Send(vec_pos.toString() + " | " + n_pos.toString(), serverLevel);
 
             RenderHandler.AddLineIfAbsent(
-                    "n"+ TerrainUtils.idFromXZ(pos),
+                    "n"+ pos.toString(),
                     TerrainUtils.BlockPosToVec3(pos),
                     TerrainUtils.BlockPosToVec3(pos).add(n_pos),
                     0,255,0,255
             );
 
             RenderHandler.AddLineIfAbsent(
-                    "f"+ TerrainUtils.idFromXZ(pos),
+                    "f"+ pos.toString(),
                     TerrainUtils.BlockPosToVec3(pos),
                     TerrainUtils.BlockPosToVec3(pos).add(f_pos),
                     0,0,255,255

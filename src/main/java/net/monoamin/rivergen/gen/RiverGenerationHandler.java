@@ -28,21 +28,6 @@ public class RiverGenerationHandler {
 
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent event) {
-        /*tickCounter++;
-        if (tickCounter % 200 == 0) { // Once per 10s
-            if (world_isLoaded) {
-                for (ServerPlayer player : serverLevel.getServer().getPlayerList().getPlayers()) {
-                    BlockPos playerPos = new BlockPos(player.getBlockX(), player.getBlockY() - 1, player.getBlockZ());
-                    BlockPos targetPos = new BlockPos(0,0,0);
-                    while (targetPos.getY() < 80)  {
-                        targetPos = TerrainUtils.getRandomXZWithinCircle(playerPos.getX(), playerPos.getZ(), 10, 100, serverLevel.getServer().overworld());
-                    }
-                    traceRiver(targetPos);
-                    DebugMessage.Send("Traced River at " + targetPos.toString(), serverLevel);
-                }
-            }
-            tickCounter = 0;
-        }*/
     }
 
     @SubscribeEvent
@@ -50,22 +35,21 @@ public class RiverGenerationHandler {
         if (event.getLevel() instanceof ServerLevel level) {
             serverLevel = level.getServer().overworld();
             world_isLoaded = true;
-            //erosionDataHolder = new ErosionDataHolder(level, true);
             riverNetwork = new RiverNetwork(serverLevel, true);
             terrainCarver = new TerrainCarver(serverLevel, 3, 8);
-            DebugMessage.Send("Loaded.", serverLevel);
+            DebugMessage.Send("rivergen loaded.", serverLevel);
         }
     }
 
     public static void traceRiver(Vec3 pos) {
-        DebugMessage.Send("Running rivergen...", serverLevel);
+        DebugMessage.Send("running rivergen...", serverLevel);
         River r = riverNetwork.traceRiverFrom(pos, false);
 
-        if (r.length() >= 4) {
+        if (r.length() >= 4) { // catmull rom needs at least 4 points to interpolate
             Spline s = new Spline(r.getPath());
             terrainCarver.asyncCarveChannelSpline(s.generateSplinePoints(20));
         }
-        else{
+        else{ // if we have less then use the simple carver
             //terrainCarver.simpleCarveChannelSpline(r.getPath());
         }
 
