@@ -73,4 +73,17 @@ public class Spline {
         }
         return splinePoints;
     }
+
+    public double getSpatialLength()
+    {
+        // Step 1: Calculate the total length of the spline
+        float totalLength = 0.0f;
+        for (int i = 0; i < nodes.size() - 1; i++) {
+            Vec3 start = nodes.get(i).vec3();
+            Vec3 end = nodes.get(i + 1).vec3();
+            totalLength += (float) start.distanceTo(end);
+        }
+
+        return totalLength;
+    }
 }

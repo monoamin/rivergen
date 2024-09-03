@@ -1,5 +1,6 @@
 package net.monoamin.rivergen.debug;
 
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -107,7 +108,7 @@ public class DebugToolItem extends Item {
                 break;
             case "item.rivergen.start_gen":
                 DebugMessage.Send("StartGen used!", player.getServer().overworld());
-                RiverGenerationHandler.traceRiver(blockPos);
+                RiverGenerationHandler.traceRiver(TerrainUtils.BlockPosToVec3(blockPos));
                 break;
             default: break;
         }

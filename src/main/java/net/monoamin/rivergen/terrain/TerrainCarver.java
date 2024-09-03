@@ -7,6 +7,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.monoamin.rivergen.render.RenderHandler;
 import net.monoamin.rivergen.spline.SplineNode;
+import java.util.concurrent.CompletableFuture;
 
 import java.util.*;
 
@@ -22,42 +23,82 @@ public class TerrainCarver {
         this.channelRadiusMin = channelRadiusMin;
     }
 
-    public void carveChannel(ArrayList<Vec3> pathNodes) {
-        if (pathNodes.size() < 2) {
-            return; // Need at least two points to interpolate
-        }
+    public void asyncCarveChannelSpline(ArrayList<SplineNode> splineNodes) {
+        carveChannelSplineAsync(splineNodes).thenRun(() -> {
+            // This code runs after carving is complete.
+            System.out.println("Carving completed!");
+        }).exceptionally(ex -> {
+            // Handle any exceptions that occurred during the async operation
+            ex.printStackTrace();
+            return null;
+        });
+    }
 
-        for (Vec3 node: pathNodes){
-        }
+    private CompletableFuture<Void> carveChannelSplineAsync(ArrayList<SplineNode> splineNodes) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                if (splineNodes.size() < 2) {
+                    return; // Need at least two points to interpolate
+                }
 
+                // Step 1: Calculate the total length of the spline
+                float totalLength = 0.0f;
+                for (int i = 0; i < splineNodes.size() - 1; i++) {
+                    Vec3 start = splineNodes.get(i).vec3();
+                    Vec3 end = splineNodes.get(i + 1).vec3();
+                    totalLength += (float) start.distanceTo(end);
+                }
 
-        for (int i = 0; i < pathNodes.size() - 1; i++) {
+                // Step 2: Iterate through each segment and carve the river
+                float cumulativeLength = 0.0f;
+                for (int i = 0; i < splineNodes.size() - 1; i++) {
+                    SplineNode startNode = splineNodes.get(i);
+                    SplineNode endNode = splineNodes.get(i + 1);
+                    carveSegment(startNode, endNode, cumulativeLength, totalLength);
 
-            if(i>0) {
-                RenderHandler.AddLineIfAbsent("line-"+ TerrainUtils.idFromVec3(pathNodes.get(i)), pathNodes.get(i - 1), pathNodes.get(i), 0, 100, 255, 255);
+                    // Update cumulative length
+                    cumulativeLength += (float) startNode.vec3().distanceTo(endNode.vec3());
+
+                    // Optionally, yield control to avoid locking the game loop
+                    if (i % 10 == 0) {
+                        Thread.sleep(10); // Introduce a brief delay to yield control
+                    }
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // Handle thread interruption
             }
+        });
+    }
 
-            Vec3 start = pathNodes.get(i);
-            Vec3 end = pathNodes.get(i + 1);
 
-            // Interpolate between start and end
-            float distance = (float) start.distanceTo(end);
-            int numSteps = (int) (distance / (channelRadiusMin / 2.0)); // Adjust steps based on radius
+    private void carveSegment(SplineNode startNode, SplineNode endNode, float cumulativeLength, float totalLength) {
+        Vec3 start = startNode.vec3();
+        Vec3 end = endNode.vec3();
 
-            for (int step = 0; step <= numSteps; step++) {
-                float t = (float) step / numSteps;
-                Vec3 interpolatedPoint = lerp(start, end, t);
+        float segmentLength = (float) start.distanceTo(end);
+        int numSteps = (int) (segmentLength / (channelRadiusMin / 2.0)); // Adjust steps based on radius
 
-                // Carve the terrain at the interpolated point
-                var normalizedStep = step / (float) pathNodes.size();
-                int targetRadius = Math.round(channelRadiusMin + normalizedStep * (channelRadiusMax - channelRadiusMin));
-                carveSphere(interpolatedPoint, targetRadius);
-            }
+        for (int step = 0; step <= numSteps; step++) {
+            float t = (float) step / numSteps;
+            Vec3 interpolatedPoint = lerp(start, end, t);
+
+            // Calculate progress along the entire spline
+            float currentDistanceAlongSpline = cumulativeLength + t * segmentLength;
+            float normalizedDistance = currentDistanceAlongSpline / totalLength;
+
+            // Calculate the target radius based on the normalized distance along the entire spline
+            int targetRadius = Math.round(channelRadiusMin + normalizedDistance * (channelRadiusMax - channelRadiusMin));
+
+            int yLevelDiff = TerrainUtils.getYValueAt(interpolatedPoint)-(int)interpolatedPoint.y + 2;
+            if (yLevelDiff < 0) yLevelDiff = 0;
+            // Carve the terrain at the interpolated point
+            carveParabolicChannel(interpolatedPoint, targetRadius, 0, yLevelDiff, Blocks.AIR, Blocks.WATER);
+            carveParabolicChannel(interpolatedPoint, targetRadius, 0, -3, Blocks.WATER, Blocks.WATER);
         }
     }
 
-    public void carveChannelSpline(ArrayList<SplineNode> splineNodes)
-    {
+
+    public void simpleCarveChannelSpline(ArrayList<SplineNode> splineNodes) {
         if (splineNodes.size() < 2) {
             return; // Need at least two points to interpolate
         }
@@ -98,8 +139,8 @@ public class TerrainCarver {
 
                 // Carve the terrain at the interpolated point
                 //carveSphere(interpolatedPoint, targetRadius);
-                carveParabolicChannel(interpolatedPoint, targetRadius, 5, Blocks.AIR);
-                carveParabolicChannel(interpolatedPoint, targetRadius, -2, Blocks.WATER);
+                carveParabolicChannel(interpolatedPoint, targetRadius, 0, 10, Blocks.AIR, Blocks.WATER);
+                carveParabolicChannel(interpolatedPoint, targetRadius, 0, -3, Blocks.WATER, Blocks.WATER);
                 // TODO: Fix flood fill algo
                 //fillWater(interpolatedPoint, targetRadius);
             }
@@ -178,7 +219,7 @@ public class TerrainCarver {
         return distanceSquared <= maxRadius * maxRadius && pos.getY() < (center.y - heightOffset);
     }
 
-    private void carveParabolicChannel(Vec3 center, int maxRadius, int heightOffset, Block block) {
+    private void carveParabolicChannel(Vec3 center, int maxRadius, int heightOffset, int heightAboveCenter, Block block, Block ifNotBlock) {
         BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
 
         // Define the falloff of the parabola, you can adjust the coefficient to make it steeper or shallower
@@ -190,18 +231,21 @@ public class TerrainCarver {
                 int distanceSquared = x * x + z * z;
 
                 if (distanceSquared <= maxRadius * maxRadius) {
-                    // Calculate the maximum depth of the channel at this point
+                    // Calculate the maximum depth and height of the channel at this point
                     float normalizedDistance = distanceSquared * falloffCoefficient;
                     int depth = Math.round(maxRadius * (1 - normalizedDistance)); // Parabolic falloff
 
-                    // Carve downwards according to the parabolic shape
-                    for (int y = -depth; y <= 0 + heightOffset; y++) {
+                    // Adjust carving range to reach above the center
+                    for (int y = -depth; y <= heightAboveCenter + heightOffset; y++) {
                         blockPos.set(center.x + x, center.y + y, center.z + z);
-                        TerrainUtils.setBlock(blockPos, block);
+                        if (level.getBlockState(blockPos) != ifNotBlock.defaultBlockState()) {
+                            TerrainUtils.setBlock(blockPos, block);
+                        }
                     }
                 }
             }
         }
     }
+
 
 }

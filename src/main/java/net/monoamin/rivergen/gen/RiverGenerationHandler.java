@@ -2,6 +2,7 @@ package net.monoamin.rivergen.gen;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -56,16 +57,16 @@ public class RiverGenerationHandler {
         }
     }
 
-    public static void traceRiver(BlockPos blockPos) {
-        //DebugMessage.Send("Running...", serverLevel);
-        River r = riverNetwork.start(TerrainUtils.BlockPosToVec3(blockPos), false);
+    public static void traceRiver(Vec3 pos) {
+        DebugMessage.Send("Running rivergen...", serverLevel);
+        River r = riverNetwork.traceRiverFrom(pos, false);
 
         if (r.length() >= 4) {
             Spline s = new Spline(r.getPath());
-            terrainCarver.carveChannelSpline(s.generateSplinePoints(20));
+            terrainCarver.asyncCarveChannelSpline(s.generateSplinePoints(20));
         }
         else{
-            terrainCarver.carveChannel(r.getPath());
+            //terrainCarver.simpleCarveChannelSpline(r.getPath());
         }
 
     }

@@ -3,11 +3,10 @@ package net.monoamin.rivergen;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -33,13 +32,13 @@ public class CommandRegistration {
         );
     }
 
-    private static int executeCommand(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    private static int executeCommand(CommandContext<CommandSourceStack> context) {
         String xVal = StringArgumentType.getString(context, "x");
         String zVal = StringArgumentType.getString(context, "z");
         int x = Integer.parseInt(xVal);
         int z = Integer.parseInt(zVal);
         int height = TerrainUtils.getYValueAt(x, z);
-        BlockPos riverPos = new BlockPos(x, height, z);
+        Vec3 riverPos = new Vec3(x, height, z);
         RiverGenerationHandler.traceRiver(riverPos);
         context.getSource().sendSuccess(() -> Component.literal("River generated at: " + xVal + " " +zVal), false);
         return 1;

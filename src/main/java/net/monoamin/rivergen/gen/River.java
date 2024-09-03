@@ -14,7 +14,7 @@ public class River {
     private int segmentCount;
     private String id;
     private final int stepRadiusMax = 128;
-    private final int stepRadiusMin = 16;
+    private final int stepRadiusMin = 8;
     private final int maxStraightDistance = 128;
     private final double forceStepMinSlope = 0;
     private int straightSteps = 0;
@@ -41,7 +41,7 @@ public class River {
         Vec3 nextPoint = currentPoint;
         boolean stepped = false;
         int radius = stepRadiusMin;
-        while (radius <= stepRadiusMax && !stepped && currentPoint.y > 62 && segmentCount < 100) {
+        while (radius <= stepRadiusMax && !stepped && currentPoint.y > 62) {
             nextPoint = currentPoint;
             Vec3 directionalBias = Vec3.ZERO;
             if (segmentCount > 1) {
@@ -49,20 +49,19 @@ public class River {
             }
 
             if (!stepped) {
-                Vec3 flowDirection = TerrainUtils.getWeightedDirectionTowardsLowest(currentPoint, radius, 36).normalize();
-                Vec3 finalDirection = TerrainUtils.blendVec3(flowDirection, directionalBias, 0.5);
-                Vec3 stepCandidate = currentPoint.add(flowDirection.multiply(radius, 1.0, radius));
+                Vec3 terrainFlowDirection = TerrainUtils.getWeightedDirectionTowardsLowest(currentPoint, radius, 36);//).normalize();
+                Vec3 finalDirection = TerrainUtils.blendVec3(terrainFlowDirection, directionalBias, 0.1);
+                Vec3 stepCandidate = currentPoint.add(finalDirection.multiply(radius, 0.0, radius));
                 int yValue = TerrainUtils.getYValueAt(stepCandidate);
                 if (yValue < currentPoint.y) {
-                    stepCandidate = stepCandidate.multiply(1,0,1).add(0,yValue,0);
-                    nextPoint = stepCandidate;
+                    nextPoint = stepCandidate.multiply(1,0,1).add(0,yValue,0);;
                     stepped = true;
                     //straightSteps = 0;
-                /*} else if (yValue == currentPoint.y) {
-                    nextPoint = stepCandidate;
+                } else if (yValue >= currentPoint.y) {
+                    nextPoint = stepCandidate.add(0,0,0);
                     stepped = true;
-                    straightSteps++;
-                */}
+                    //straightSteps++;
+                }
             }
 
             // If stepped at all continue with next segment
@@ -78,7 +77,11 @@ public class River {
             segmentCount++;
         } else {
             finalized = true;
+
             // TODO: Add another 2 segments as padding to keep the path after catmull-rom interpolation
+            Vec3 lastDirection = riverPath.get(segmentCount).subtract(riverPath.get(segmentCount - 1));
+            Vec3 finalPoint = nextPoint.add(lastDirection);
+            riverPath.add(finalPoint);
         }
     }
 
