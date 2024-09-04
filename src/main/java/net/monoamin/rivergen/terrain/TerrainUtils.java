@@ -11,6 +11,7 @@ import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.monoamin.rivergen.gen.RiverGenerationHandler;
+import net.monoamin.rivergen.mathutils.WeightedGraph;
 
 import java.util.*;
 
@@ -100,6 +101,11 @@ public class TerrainUtils {
 
     public static int getYValueAt(BlockPos blockPos) {
         return getYValueAt(blockPos.getX(), blockPos.getZ());
+    }
+
+    public static WeightedGraph calculateGraphForChunk(ChunkAccess chunkAccess){
+        //TODO: Implement chunk graph calculation
+        return new WeightedGraph();
     }
 
     public static List<Vec2> getLowestVonNeumannNeighbors(Vec2 from) {

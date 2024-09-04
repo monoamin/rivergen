@@ -42,20 +42,22 @@ public class TerrainDelineator {
             } else {
                 // Create directed edge to the lowest neighbors
                 // and push them to the processing stack
-                for (Vec2 neighbor: lowestNeighbors) {
+                for (Vec2 neighbor : lowestNeighbors) {
                     terrainGraph.addEdge(currentNode, neighbor, 1);
                     processingStack.push(neighbor);
                 }
 
+            }
+
             // If the neighbor is in an unloaded chunk, load or generate it
-            if (chunkNotLoaded(currentNode.chunk)) {
+            /*if (chunkNotLoaded(currentNode.chunk)) {
                 loadChunk(currentNode.chunk);
             }
 
             // If the node reaches a boundary (e.g., ocean), terminate that path
             if (isBoundaryNode(currentNode)) {
                 continue;
-            }
+            }*/
         }
     }
 

@@ -8,6 +8,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.monoamin.rivergen.debug.DebugMessage;
 import net.monoamin.rivergen.mathutils.Spline;
+import net.monoamin.rivergen.terrain.ChunkGraphMap;
 import net.monoamin.rivergen.terrain.TerrainCarver;
 
 import java.util.Random;
@@ -22,6 +23,7 @@ public class RiverGenerationHandler {
     public static ErosionDataHolder erosionDataHolder;
     static RiverNetwork riverNetwork;
     static TerrainCarver terrainCarver;
+    static ChunkGraphMap chunkGraphMap;
     static Random r = new Random();
 
     @SubscribeEvent
@@ -31,6 +33,7 @@ public class RiverGenerationHandler {
     @SubscribeEvent
     public static void onWorldLoad(LevelEvent.Load event) {
         if (event.getLevel() instanceof ServerLevel level) {
+            chunkGraphMap = new ChunkGraphMap();
             serverLevel = level.getServer().overworld();
             world_isLoaded = true;
             riverNetwork = new RiverNetwork(serverLevel, true);
