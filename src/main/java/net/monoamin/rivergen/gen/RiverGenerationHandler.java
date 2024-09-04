@@ -1,6 +1,5 @@
 package net.monoamin.rivergen.gen;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
@@ -8,9 +7,8 @@ import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.monoamin.rivergen.debug.DebugMessage;
-import net.monoamin.rivergen.spline.Spline;
+import net.monoamin.rivergen.mathutils.Spline;
 import net.monoamin.rivergen.terrain.TerrainCarver;
-import net.monoamin.rivergen.terrain.TerrainUtils;
 
 import java.util.Random;
 

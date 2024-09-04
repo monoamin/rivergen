@@ -8,10 +8,11 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.monoamin.rivergen.gen.RiverGenerationHandler;
 
-import java.util.Random;
+import java.util.*;
 
 public class TerrainUtils {
 
@@ -66,10 +67,10 @@ public class TerrainUtils {
                 //int currentX = pos.getX() + dx;
                 //int currentZ = pos.getZ() + dz;
                 //int y = getYValueAt(pos);
-                int ynx = getYValueAt(pos.offset(-1,0,0));
-                int ypx = getYValueAt(pos.offset(1,0,0));
-                int ynz = getYValueAt(pos.offset(0,0,-1));
-                int ypz = getYValueAt(pos.offset(0,0,1));
+                int ynx = getYValueAt(pos.offset(-1, 0, 0));
+                int ypx = getYValueAt(pos.offset(1, 0, 0));
+                int ynz = getYValueAt(pos.offset(0, 0, -1));
+                int ypz = getYValueAt(pos.offset(0, 0, 1));
 
                 // Correct calculation of the local normal
                 double dxHeight = (double) (ypx - ynx) / 2.0;
@@ -94,28 +95,140 @@ public class TerrainUtils {
     }
 
     public static int getYValueAt(Vec3 vec3) {
-        return getYValueAt((int)vec3.x, (int)vec3.z);
+        return getYValueAt((int) vec3.x, (int) vec3.z);
     }
 
     public static int getYValueAt(BlockPos blockPos) {
         return getYValueAt(blockPos.getX(), blockPos.getZ());
     }
 
+    public static List<Vec2> getLowestVonNeumannNeighbors(Vec2 from) {
+        int lowest = 10000;
+        int ypx = getYValueAt((int) from.x + 1, (int) from.y);
+        int ynx = getYValueAt((int) from.x - 1, (int) from.y);
+        int ypz = getYValueAt((int) from.x, (int) from.y + 1);
+        int ynz = getYValueAt((int) from.x, (int) from.y - 1);
+
+        // Find the minimum value among all neighbors
+        lowest = Math.min(lowest, ypx);
+        lowest = Math.min(lowest, ynx);
+        lowest = Math.min(lowest, ypz);
+        lowest = Math.min(lowest, ynz);
+
+        Map<Vec2, Integer> neighbors = new HashMap<>();
+        neighbors.put(from.add(Vec2.UNIT_X), ypx);
+        neighbors.put(from.add(Vec2.NEG_UNIT_X), ynx);
+        neighbors.put(from.add(Vec2.UNIT_Y), ypz);
+        neighbors.put(from.add(Vec2.NEG_UNIT_Y), ynz);
+
+        int a = neighbors.get(Vec2.UNIT_X);
+        int b = neighbors.get(Vec2.NEG_UNIT_X);
+        int c = neighbors.get(Vec2.UNIT_Y);
+        int d = neighbors.get(Vec2.NEG_UNIT_Y);
+
+        List<Vec2> allLowest = new ArrayList<>();
+        if (a == lowest) allLowest.add(Vec2.UNIT_X);
+        if (b == lowest) allLowest.add(Vec2.NEG_UNIT_X);
+        if (c == lowest) allLowest.add(Vec2.UNIT_Y);
+        if (d == lowest) allLowest.add(Vec2.NEG_UNIT_Y);
+
+        return allLowest;
+    }
+
+    public static List<Vec2> getHighestVonNeumannNeighbors(Vec2 from) {
+        int highest = -10000;
+        int ypx = getYValueAt((int) from.x + 1, (int) from.y);
+        int ynx = getYValueAt((int) from.x - 1, (int) from.y);
+        int ypz = getYValueAt((int) from.x, (int) from.y + 1);
+        int ynz = getYValueAt((int) from.x, (int) from.y - 1);
+
+        // Find the minimum value among all neighbors
+        highest = Math.max(highest, ypx);
+        highest = Math.max(highest, ynx);
+        highest = Math.max(highest, ypz);
+        highest = Math.max(highest, ynz);
+
+        Map<Vec2, Integer> neighbors = new HashMap<>();
+        neighbors.put(from.add(Vec2.UNIT_X), ypx);
+        neighbors.put(from.add(Vec2.NEG_UNIT_X), ynx);
+        neighbors.put(from.add(Vec2.UNIT_Y), ypz);
+        neighbors.put(from.add(Vec2.NEG_UNIT_Y), ynz);
+
+        int a = neighbors.get(Vec2.UNIT_X);
+        int b = neighbors.get(Vec2.NEG_UNIT_X);
+        int c = neighbors.get(Vec2.UNIT_Y);
+        int d = neighbors.get(Vec2.NEG_UNIT_Y);
+
+        List<Vec2> allHighest = new ArrayList<>();
+        if (a == highest) allHighest.add(Vec2.UNIT_X);
+        if (b == highest) allHighest.add(Vec2.NEG_UNIT_X);
+        if (c == highest) allHighest.add(Vec2.UNIT_Y);
+        if (d == highest) allHighest.add(Vec2.NEG_UNIT_Y);
+
+        return allHighest;
+    }
+
+    public static List<Vec2> getLowestMooreNeighbors(Vec2 from) {
+        int lowest = 10000; // Arbitrarily large number to initialize the lowest value
+
+        // Get the values of all 8 neighbors in the Moore neighborhood
+        int ypx = getYValueAt((int) from.x + 1, (int) from.y);     // East
+        int ynx = getYValueAt((int) from.x - 1, (int) from.y);     // West
+        int ypz = getYValueAt((int) from.x, (int) from.y + 1);     // North
+        int ynz = getYValueAt((int) from.x, (int) from.y - 1);     // South
+        int ypxpz = getYValueAt((int) from.x + 1, (int) from.y + 1);  // Northeast
+        int ynxpz = getYValueAt((int) from.x - 1, (int) from.y + 1);  // Northwest
+        int ypxnz = getYValueAt((int) from.x + 1, (int) from.y - 1);  // Southeast
+        int ynxnz = getYValueAt((int) from.x - 1, (int) from.y - 1);  // Southwest
+
+        // Find the minimum value among all neighbors
+        lowest = Math.min(lowest, ypx);
+        lowest = Math.min(lowest, ynx);
+        lowest = Math.min(lowest, ypz);
+        lowest = Math.min(lowest, ynz);
+        lowest = Math.min(lowest, ypxpz);
+        lowest = Math.min(lowest, ynxpz);
+        lowest = Math.min(lowest, ypxnz);
+        lowest = Math.min(lowest, ynxnz);
+
+        // Map each Vec2 position to its respective value
+        Map<Vec2, Integer> neighbors = new HashMap<>();
+        neighbors.put(from.add(Vec2.UNIT_X), ypx);
+        neighbors.put(from.add(Vec2.NEG_UNIT_X), ynx);
+        neighbors.put(from.add(Vec2.UNIT_Y), ypz);
+        neighbors.put(from.add(Vec2.NEG_UNIT_Y), ynz);
+        neighbors.put(from.add(Vec2.UNIT_X.add(Vec2.UNIT_Y)), ypxpz);      // Northeast
+        neighbors.put(from.add(Vec2.NEG_UNIT_X.add(Vec2.UNIT_Y)), ynxpz);     // Northwest
+        neighbors.put(from.add(Vec2.UNIT_X.add(Vec2.NEG_UNIT_Y)), ypxnz);     // Southeast
+        neighbors.put(from.add(Vec2.NEG_UNIT_X.add(Vec2.NEG_UNIT_Y)), ynxnz);    // Southwest
+
+        // List to hold all Vec2 positions with the lowest value
+        List<Vec2> allLowest = new ArrayList<>();
+        for (Map.Entry<Vec2, Integer> entry : neighbors.entrySet()) {
+            if (entry.getValue() == lowest) {
+                allLowest.add(entry.getKey()); // Add Vec2 position if it has the lowest value
+            }
+        }
+
+        return allLowest;
+    }
+
+
     public static int getYValueAt(int x, int z) {
         BlockPos blockPos = new BlockPos(x, 0, z);
 
         ChunkAccess chunkAccess = RiverGenerationHandler.serverLevel.getChunk(blockPos);
         ChunkStatus chunkStatus = chunkAccess.getStatus();
-        if (chunkStatus.isOrAfter(ChunkStatus.SURFACE))
-        {
-            return chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x,z);
-        }
-        else
-        {
+        if (chunkStatus.isOrAfter(ChunkStatus.NOISE)) {
+            return chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
+        } else {
+            // This triggers full chunk generation :(
+            // Maybe.. //RiverGenerationHandler.serverLevel.getChunkSource().getGenerator().fillFromNoise() ...
             chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
-            return chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x,z);
+            return chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
         }
     }
+
 
     public static double getFinalDensityAt(BlockPos blockPos) {
         NoiseBasedChunkGenerator generator = (NoiseBasedChunkGenerator) RiverGenerationHandler.serverLevel.getChunkSource().getGenerator();

@@ -6,7 +6,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.monoamin.rivergen.render.RenderHandler;
-import net.monoamin.rivergen.spline.SplineNode;
+import net.monoamin.rivergen.mathutils.SplineNode;
 import java.util.concurrent.CompletableFuture;
 
 import java.util.*;
