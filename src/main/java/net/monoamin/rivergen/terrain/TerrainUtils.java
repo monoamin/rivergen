@@ -2,6 +2,7 @@ package net.monoamin.rivergen.terrain;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -10,8 +11,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import net.monoamin.rivergen.gen.RiverGenerationHandler;
-import net.monoamin.rivergen.mathutils.WeightedGraph;
+import net.monoamin.rivergen.gen.WorldStateHandler;
 
 import java.util.*;
 
@@ -103,17 +103,12 @@ public class TerrainUtils {
         return getYValueAt(blockPos.getX(), blockPos.getZ());
     }
 
-    public static WeightedGraph calculateGraphForChunk(ChunkAccess chunkAccess){
-        //TODO: Implement chunk graph calculation
-        return new WeightedGraph();
-    }
-
-    public static List<Vec2> getLowestVonNeumannNeighbors(Vec2 from) {
+    public static List<Vec2> getLowestVonNeumannNeighbors(Vec2 from, int ypx, int ynx, int ypz, int ynz) {
         int lowest = 10000;
-        int ypx = getYValueAt((int) from.x + 1, (int) from.y);
-        int ynx = getYValueAt((int) from.x - 1, (int) from.y);
-        int ypz = getYValueAt((int) from.x, (int) from.y + 1);
-        int ynz = getYValueAt((int) from.x, (int) from.y - 1);
+        //int ypx = getYValueAt((int) from.x + 1, (int) from.y);
+        //int ynx = getYValueAt((int) from.x - 1, (int) from.y);
+        //int ypz = getYValueAt((int) from.x, (int) from.y + 1);
+        //int ynz = getYValueAt((int) from.x, (int) from.y - 1);
 
         // Find the minimum value among all neighbors
         lowest = Math.min(lowest, ypx);
@@ -223,7 +218,7 @@ public class TerrainUtils {
     public static int getYValueAt(int x, int z) {
         BlockPos blockPos = new BlockPos(x, 0, z);
 
-        ChunkAccess chunkAccess = RiverGenerationHandler.serverLevel.getChunk(blockPos);
+        ChunkAccess chunkAccess = WorldStateHandler.serverLevel.getChunk(blockPos);
         ChunkStatus chunkStatus = chunkAccess.getStatus();
         if (chunkStatus.isOrAfter(ChunkStatus.NOISE)) {
             return chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
@@ -237,7 +232,7 @@ public class TerrainUtils {
 
 
     public static double getFinalDensityAt(BlockPos blockPos) {
-        NoiseBasedChunkGenerator generator = (NoiseBasedChunkGenerator) RiverGenerationHandler.serverLevel.getChunkSource().getGenerator();
+        NoiseBasedChunkGenerator generator = (NoiseBasedChunkGenerator) WorldStateHandler.serverLevel.getChunkSource().getGenerator();
         return generator.generatorSettings().get().noiseRouter().finalDensity().compute(new DensityFunction.SinglePointContext(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
     }
 
@@ -306,7 +301,7 @@ public class TerrainUtils {
 
     public static void setBlock(BlockPos blockPos, Block block) {
         //RiverGenerationHandler.serverLevel.getChunkSource().getChunkNow(blockPos.getX() >> 4, blockPos.getZ() >> 4);
-        RiverGenerationHandler.serverLevel.setBlock(blockPos, block.defaultBlockState(), 3);
+        WorldStateHandler.serverLevel.setBlock(blockPos, block.defaultBlockState(), 3);
     }
 
     public static BlockPos getRandomXZWithinCircle(int centerX, int centerZ, double minDistance, double maxDistance, ServerLevel level) {
@@ -334,5 +329,22 @@ public class TerrainUtils {
 
         // Optionally normalize the blended vector if you want a unit vector
         return blendedVec.normalize();
+    }
+
+    public static long[][] deserializeHeightMap(long[] heights)
+    {
+        if (heights.length != 256) {
+            throw new IllegalArgumentException("Array length must be 256 for a 16x16 matrix.");
+        }
+
+        long[][] matrix = new long[16][16];
+
+        for (int i = 0; i < heights.length; i++) {
+            int row = i / 16;  // Calculate the row index
+            int col = i % 16;  // Calculate the column index
+            matrix[row][col] = heights[i];
+        }
+
+        return matrix;
     }
 }

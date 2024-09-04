@@ -8,13 +8,13 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.monoamin.rivergen.debug.DebugMessage;
 import net.monoamin.rivergen.mathutils.Spline;
-import net.monoamin.rivergen.terrain.ChunkGraphMap;
+import net.monoamin.rivergen.world.ChunkGraphMap;
 import net.monoamin.rivergen.terrain.TerrainCarver;
 
 import java.util.Random;
 
 @Mod.EventBusSubscriber(modid = "rivergen")
-public class RiverGenerationHandler {
+public class WorldStateHandler {
 
     static int tickCounter = 0;
     static int radius = 20;
@@ -23,7 +23,7 @@ public class RiverGenerationHandler {
     public static ErosionDataHolder erosionDataHolder;
     static RiverNetwork riverNetwork;
     static TerrainCarver terrainCarver;
-    static ChunkGraphMap chunkGraphMap;
+    public static ChunkGraphMap chunkGraphMap;
     static Random r = new Random();
 
     @SubscribeEvent

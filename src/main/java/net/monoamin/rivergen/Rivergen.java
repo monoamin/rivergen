@@ -13,7 +13,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.monoamin.rivergen.debug.DebugToolItem;
-import net.monoamin.rivergen.gen.RiverGenerationHandler;
+import net.monoamin.rivergen.gen.WorldStateHandler;
 import net.monoamin.rivergen.render.RenderHandler;
 
 @Mod(Rivergen.MODID)
@@ -40,7 +40,7 @@ public class Rivergen {
         modEventBus.addListener(this::setup);
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(RenderHandler.class);
-        MinecraftForge.EVENT_BUS.register(RiverGenerationHandler.class);
+        MinecraftForge.EVENT_BUS.register(WorldStateHandler.class);
         ITEMS.register(modEventBus);
         // Register event bus to listen for creative tab build events
         modEventBus.addListener(this::buildContents);

@@ -1,6 +1,8 @@
 package net.monoamin.rivergen.mathutils;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
+import net.monoamin.rivergen.terrain.TerrainUtils;
 
 import java.util.*;
 
@@ -97,5 +99,41 @@ public class WeightedGraph {
     // Returns the weights of the graph
     public Map<Vec2, Map<Vec2, Double>> getWeights() {
         return weights;
+    }
+
+    public static WeightedGraph fromChunk(ChunkAccess chunkAccess){
+        WeightedGraph weightedGraph = new WeightedGraph();
+        // TODO: Evaluate better alternatives
+        long[] yLevels = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE).getRawData();
+        long[][] gridYLevels = new long[16][16];
+        for (int i = 0; i < yLevels.length; i++) {
+            int relY = (int) i / 16;
+            int relX = i % 16;
+            gridYLevels[relX][relY] = yLevels[i];
+        }
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+
+                int ypx = 0, ynx = 0, ypz = 0, ynz = 0;
+                if (x >= 15) ypx = (int)gridYLevels[x][z];
+                if (x <= 0) ynx = (int)gridYLevels[x][z];
+                if (z >= 15) ypz = (int)gridYLevels[x][z];
+                if (z <= 0) ynz = (int)gridYLevels[x][z];
+
+                if (x > 0 && x < 15 && z > 0 && z < 15) {
+                    ypx = (int)gridYLevels[x+1][z];
+                    ynx = (int)gridYLevels[x-1][z];
+                    ypz = (int)gridYLevels[x][z+1];
+                    ynz = (int)gridYLevels[x][z-1];
+                }
+
+                Vec2 cursor = new Vec2(x, x);
+                for (Vec2 lowerNeighbor : TerrainUtils.getLowestVonNeumannNeighbors(cursor, ypx, ynx, ypz, ynz)) {
+                    weightedGraph.addEdge(cursor, lowerNeighbor, 1);
+                }
+            }
+        }
+
+        return new WeightedGraph();
     }
 }

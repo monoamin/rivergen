@@ -1,4 +1,4 @@
-package net.monoamin.rivergen.gen;
+package net.monoamin.rivergen.world;
 
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.WorldGenRegion;
@@ -7,12 +7,8 @@ import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.*;
-import net.minecraft.world.level.levelgen.blending.Blender;
+import net.monoamin.rivergen.gen.WorldStateHandler;
 import net.monoamin.rivergen.mathutils.WeightedGraph;
-import net.monoamin.rivergen.terrain.TerrainUtils;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 public class RivergenChunkGenerator extends NoiseBasedChunkGenerator {
 
@@ -30,9 +26,12 @@ public class RivergenChunkGenerator extends NoiseBasedChunkGenerator {
     @Override
     public void applyCarvers(WorldGenRegion pLevel, long pSeed, RandomState pRandom,BiomeManager pBiomeManager, StructureManager pStructureManager, ChunkAccess pChunk, GenerationStep.Carving pStep )
     {
-        // TODO: Implement
-        WeightedGraph chunkGraph = TerrainUtils.calculateGraphForChunk(pChunk);
-        RiverGenerationHandler.chunkGraphMap.chunkWeightedGraphMap.put(pChunk.getPos(), chunkGraph);
+        // TODO: Check
+        // Calculate Weighted Graph for Chunk if it doesn't exist
+        if (!WorldStateHandler.chunkGraphMap.exists(pChunk.getPos())) {
+            WeightedGraph chunkGraph = WeightedGraph.fromChunk(pChunk);
+            WorldStateHandler.chunkGraphMap.add(pChunk.getPos(), chunkGraph);
+        }
         super.applyCarvers(pLevel, pSeed, pRandom, pBiomeManager, pStructureManager, pChunk, pStep);
     }
 
