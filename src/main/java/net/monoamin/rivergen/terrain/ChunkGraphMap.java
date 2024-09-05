@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ChunkGraphMap {
-    private Map<ChunkPos, WeightedGraph> map;
+    private final Map<ChunkPos, WeightedGraph> map;
     public ChunkGraphMap()
     {
         map = new HashMap<>();

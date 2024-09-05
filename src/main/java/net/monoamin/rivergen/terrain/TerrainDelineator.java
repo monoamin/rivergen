@@ -13,7 +13,7 @@ public class TerrainDelineator {
 
 
     public void delineateWatershed(Vec2 startNode) {
-        Stack<Vec2> processingStack = new Stack<>();
+/*        Stack<Vec2> processingStack = new Stack<>();
         Set<Vec2> visitedNodes = new HashSet<>();
         WeightedGraph terrainGraph = new WeightedGraph();
 
@@ -50,15 +50,15 @@ public class TerrainDelineator {
             }
 
             // If the neighbor is in an unloaded chunk, load or generate it
-            /*if (chunkNotLoaded(currentNode.chunk)) {
+            if (chunkNotLoaded(currentNode.chunk)) {
                 loadChunk(currentNode.chunk);
             }
 
             // If the node reaches a boundary (e.g., ocean), terminate that path
             if (isBoundaryNode(currentNode)) {
                 continue;
-            }*/
-        }
+            }
+        }*/
     }
 
 }

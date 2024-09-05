@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class GraphContextLayer extends ContextLayer{
 
-    private Map<ChunkPos, ChunkGraphMap> layerChunks;
+    private final Map<ChunkPos, ChunkGraphMap> layerChunks;
 
     public GraphContextLayer() {
         layerChunks = new HashMap<ChunkPos, ChunkGraphMap>();

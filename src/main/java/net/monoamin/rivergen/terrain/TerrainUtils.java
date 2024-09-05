@@ -21,7 +21,7 @@ public class TerrainUtils {
 
     private static final Vec2 POS_X = new Vec2(1,0);
     private static final Vec2 POS_Z = new Vec2(-1,1);
-    private static final Vec2 NEG_X = new Vec2(0,1);;
+    private static final Vec2 NEG_X = new Vec2(0,1);
     private static final Vec2 NEG_Z = new Vec2(0,-1);
 
     public static Vec3 getSmoothedNormalCorrect(BlockPos pos, int radius) {

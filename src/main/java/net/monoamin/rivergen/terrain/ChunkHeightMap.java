@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ChunkHeightMap {
-    private Map<ChunkPos, long[][]> map;
+    private final Map<ChunkPos, long[][]> map;
     public ChunkHeightMap()
     {
         map = new HashMap<>();

@@ -23,6 +23,7 @@ public class RGenChunkGenerator extends NoiseBasedChunkGenerator {
     }
 
     // Method that handles the initial terrain filling before all other processing of the chunk is done
+    // TODO: Fix. Never fires.
     @Override
     public @NotNull CompletableFuture<ChunkAccess> fillFromNoise(Executor pExecutor, Blender pBlender, RandomState pRandom, StructureManager pStructureManager, ChunkAccess pChunk) {
         // Fill chunk from noise

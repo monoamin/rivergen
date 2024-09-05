@@ -148,7 +148,7 @@ public class ErosionDataHolder {
             );
 
             RenderHandler.AddLineIfAbsent(
-                    "f"+ pos.toString(),
+                    "f"+ pos,
                     TerrainUtils.BlockPosToVec3(pos),
                     TerrainUtils.BlockPosToVec3(pos).add(f_pos),
                     0,0,255,255
