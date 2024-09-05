@@ -21,11 +21,10 @@ public class ChunkGraphMap {
         map.remove(chunkPos);
     }
 
-    public void add(ChunkPos chunkPos, WeightedGraph chunkGraph)
+    public void add(WeightedGraph chunkGraph, ChunkPos chunkPos)
     {
         map.put(chunkPos,chunkGraph);
 
-        // TODO: Add stitching of ChunkGraphs
         int xChunk = chunkPos.x;
         int zChunk = chunkPos.z;
 
@@ -37,85 +36,69 @@ public class ChunkGraphMap {
 
         // Stitch with neighboring chunks if they exist
         if (map.containsKey(xpChunk)) {
-            stitchChunks(chunkGraph, map.get(xpChunk), "right"); // Right border stitching
+            stitchChunks(chunkGraph, chunkPos, map.get(xpChunk), "right"); // Right border stitching
         }
         if (map.containsKey(xnChunk)) {
-            stitchChunks(chunkGraph, map.get(xnChunk), "left"); // Left border stitching
+            stitchChunks(chunkGraph, chunkPos, map.get(xnChunk), "left"); // Left border stitching
         }
         if (map.containsKey(zpChunk)) {
-            stitchChunks(chunkGraph, map.get(zpChunk), "top"); // Top border stitching
+            stitchChunks(chunkGraph, chunkPos, map.get(zpChunk), "top"); // Top border stitching
         }
         if (map.containsKey(znChunk)) {
-            stitchChunks(chunkGraph, map.get(znChunk), "bottom"); // Bottom border stitching
+            stitchChunks(chunkGraph, chunkPos, map.get(znChunk), "bottom"); // Bottom border stitching
         }
     }
 
-    private void stitchChunks(WeightedGraph currentGraph, WeightedGraph neighborGraph, String direction) {
+    private void stitchChunks(WeightedGraph currentGraph, ChunkPos sourceChunk, WeightedGraph neighborGraph, String direction) {
         // Determine the border nodes to connect based on the direction
         for (int i = 0; i < 16; i++) { // Assuming the chunks are 16x16
-            Vec2 currentNode;
+            Vec2 sourceNode;
             Vec2 neighborNode;
-            double weight;
+            double edgeWeight;
+
+            ChunkPos targetChunk;
 
             // Example for right-edge stitching
             if (direction.equals("right")) {
-                currentNode = new Vec2(15, i);  // Right edge of the current chunk
+                sourceNode = new Vec2(15, i);  // Right edge of the current chunk
                 neighborNode = new Vec2(0, i);  // Left edge of the neighboring chunk
-                weight = Math.abs(currentGraph.getHeight(15, i) - neighborGraph.getHeight(0, i));
+                targetChunk = new ChunkPos(sourceChunk.x+1, sourceChunk.z);
+                edgeWeight = Math.abs(currentGraph.getNodeWeight(TerrainUtils.getAbsoluteBlockPos(sourceChunk, new Vec2(15, i))) - neighborGraph.getNodeWeight(TerrainUtils.getAbsoluteBlockPos(targetChunk, new Vec2(0, i))));
             } else if (direction.equals("left")) {
-                currentNode = new Vec2(0, i);  // Left edge of the current chunk
+                sourceNode = new Vec2(0, i);  // Left edge of the current chunk
                 neighborNode = new Vec2(15, i);  // Right edge of the neighboring chunk
-                weight = Math.abs(currentGraph.getHeight(0, i) - neighborGraph.getHeight(15, i));
+                targetChunk = new ChunkPos(sourceChunk.x-1, sourceChunk.z);
+                edgeWeight = Math.abs(currentGraph.getNodeWeight(TerrainUtils.getAbsoluteBlockPos(sourceChunk, new Vec2(0, i))) - neighborGraph.getNodeWeight(TerrainUtils.getAbsoluteBlockPos(targetChunk, new Vec2(15, i))));
             } else if (direction.equals("top")) {
-                currentNode = new Vec2(i, 15);  // Top edge of the current chunk
+                sourceNode = new Vec2(i, 15);  // Top edge of the current chunk
                 neighborNode = new Vec2(i, 0);  // Bottom edge of the neighboring chunk
-                weight = Math.abs(currentGraph.getHeight(i, 15) - neighborGraph.getHeight(i, 0));
+                targetChunk = new ChunkPos(sourceChunk.x, sourceChunk.z+1);
+                edgeWeight = Math.abs(currentGraph.getNodeWeight(TerrainUtils.getAbsoluteBlockPos(sourceChunk, new Vec2(i, 15))) - neighborGraph.getNodeWeight(TerrainUtils.getAbsoluteBlockPos(targetChunk, new Vec2(i, 0))));
             } else {
-                currentNode = new Vec2(i, 0);  // Bottom edge of the current chunk
+                sourceNode = new Vec2(i, 0);  // Bottom edge of the current chunk
                 neighborNode = new Vec2(i, 15);  // Top edge of the neighboring chunk
-                weight = Math.abs(currentGraph.getHeight(i, 0) - neighborGraph.getHeight(i, 15));
+                targetChunk = new ChunkPos(sourceChunk.x, sourceChunk.z-1);
+                edgeWeight = Math.abs(currentGraph.getNodeWeight(TerrainUtils.getAbsoluteBlockPos(sourceChunk, new Vec2(i, 0))) - neighborGraph.getNodeWeight(TerrainUtils.getAbsoluteBlockPos(targetChunk, new Vec2(i, 15))));
             }
 
-            // Add edges between the current chunk and the neighbor
-            currentGraph.addEdge(currentNode, neighborNode, weight);
-            neighborGraph.addEdge(neighborNode, currentNode, weight);
-        }
-    }
-
-    private void stitchChunks(WeightedGraph currentGraph, WeightedGraph neighborGraph, String direction) {
-        // Determine the border nodes to connect based on the direction
-        for (int i = 0; i < 16; i++) { // Assuming the chunks are 16x16
-            Vec3 currentNode;
-            Vec3 neighborNode;
-            double weight;
-
-            // Example for right-edge stitching
-            if (direction.equals("right")) {
-                currentNode = new Vec2(15, i);  // Right edge of the current chunk
-                neighborNode = new Vec2(0, i);  // Left edge of the neighboring chunk
-                weight = Math.abs(currentGraph.getNodeWeight(15, i) - neighborGraph.getNodeWeight(0, i));
-            } else if (direction.equals("left")) {
-                currentNode = new Vec2(0, i);  // Left edge of the current chunk
-                neighborNode = new Vec2(15, i);  // Right edge of the neighboring chunk
-                weight = Math.abs(currentGraph.getNodeWeight(0, i) - neighborGraph.getNodeWeight(15, i));
-            } else if (direction.equals("top")) {
-                currentNode = new Vec2(i, 15);  // Top edge of the current chunk
-                neighborNode = new Vec2(i, 0);  // Bottom edge of the neighboring chunk
-                weight = Math.abs(currentGraph.getNodeWeight(i, 15) - neighborGraph.getNodeWeight(i, 0));
-            } else {
-                currentNode = new Vec2(i, 0);  // Bottom edge of the current chunk
-                neighborNode = new Vec2(i, 15);  // Top edge of the neighboring chunk
-                weight = Math.abs(currentGraph.getNodeWeight(i, 0) - neighborGraph.getNodeWeight(i, 15));
-            }
+            Vec2 absCurrentNode = TerrainUtils.getAbsoluteBlockPos(sourceChunk, sourceNode);
+            Vec2 absNeighborNode = TerrainUtils.getAbsoluteBlockPos(targetChunk, neighborNode);
 
             // Add edges between the current chunk and the neighbor
-            currentGraph.addDirectedEdge(currentNode, neighborNode, weight);
-            neighborGraph.addDirectedEdge(neighborNode, currentNode, weight);
+            currentGraph.addDirectedEdge(absCurrentNode, absNeighborNode, edgeWeight);
+            neighborGraph.addDirectedEdge(absCurrentNode, absNeighborNode, edgeWeight);
         }
     }
-
 
     public boolean exists(ChunkPos chunkPos) {
         return map.containsKey(chunkPos);
+    }
+
+    public WeightedGraph get(ChunkPos chunkPos) {
+        return map.get(chunkPos);
+    }
+
+    public void remove(ChunkPos chunkPos) {
+        map.remove(chunkPos);
     }
 }

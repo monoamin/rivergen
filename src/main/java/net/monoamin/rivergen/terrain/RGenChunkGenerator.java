@@ -10,6 +10,7 @@ import net.minecraft.world.level.levelgen.*;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.monoamin.rivergen.gen.WorldStateHandler;
 import net.monoamin.rivergen.mathutils.WeightedGraph;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -23,16 +24,16 @@ public class RGenChunkGenerator extends NoiseBasedChunkGenerator {
 
     // Method that handles the initial terrain filling before all other processing of the chunk is done
     @Override
-    public CompletableFuture<ChunkAccess> fillFromNoise(Executor pExecutor, Blender pBlender, RandomState pRandom, StructureManager pStructureManager, ChunkAccess pChunk) {
+    public @NotNull CompletableFuture<ChunkAccess> fillFromNoise(Executor pExecutor, Blender pBlender, RandomState pRandom, StructureManager pStructureManager, ChunkAccess pChunk) {
         // Fill chunk from noise
         CompletableFuture<ChunkAccess> processed = super.fillFromNoise(pExecutor, pBlender, pRandom, pStructureManager, pChunk);
 
-        // Get raw heightmap data and add it to Context layer, then construct connection graph
+        // Get raw heightmap data and add it to Context layer, then construct chunk-limited connection graph
         if (!WorldStateHandler.contextLayerManager.getLayer(ContextLayer.Types.ELEVATION).exists(pChunk.getPos())) {
             long[][] chunkHeightmap = TerrainUtils.deserializeHeightMap(pChunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE).getRawData());
             WorldStateHandler.contextLayerManager.getLayer(ContextLayer.Types.ELEVATION).addChunk(pChunk.getPos(), chunkHeightmap);
 
-            WeightedGraph chunkGraph = WeightedGraph.fromHeightmap(chunkHeightmap);
+            WeightedGraph chunkGraph = WeightedGraph.fromHeightmap(chunkHeightmap, pChunk.getPos());
             WorldStateHandler.contextLayerManager.getLayer(ContextLayer.Types.ELEVATION).addChunk(pChunk.getPos(), chunkGraph);
         }
 

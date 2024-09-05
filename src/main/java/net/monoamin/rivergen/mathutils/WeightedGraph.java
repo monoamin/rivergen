@@ -1,4 +1,5 @@
 package net.monoamin.rivergen.mathutils;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec2;
 import net.monoamin.rivergen.terrain.TerrainUtils;
 
@@ -90,7 +91,7 @@ public class WeightedGraph {
         return weights;
     }
 
-    public static WeightedGraph fromHeightmap(long[][] heightMap) {
+    public static WeightedGraph fromHeightmap(long[][] heightMap, ChunkPos chunkPos) {
         WeightedGraph weightedGraph = new WeightedGraph();
 
         for (int x = 0; x < 16; x++) {
@@ -106,11 +107,12 @@ public class WeightedGraph {
 
                 // Create a vector for the current position
                 Vec2 sourceNode = new Vec2(x, z);
-
+                Vec2 absSourceNode = TerrainUtils.getAbsoluteBlockPos(chunkPos, sourceNode);
                 // Get the lowest Von Neumann neighbors and add them to the graph
                 for (Vec2 lowerNeighbor : TerrainUtils.getLowestVonNeumannNeighbors(sourceNode, List.of(px,nx,pz,nz))) {
                     int yDiff = Math.abs((int)sourceNode.y - (int)lowerNeighbor.y);
-                    weightedGraph.addDirectedEdge(sourceNode, lowerNeighbor, yDiff);
+                    Vec2 absLowerNeighbor = TerrainUtils.getAbsoluteBlockPos(chunkPos, lowerNeighbor);
+                    weightedGraph.addDirectedEdge(absSourceNode, absLowerNeighbor, yDiff);
                 }
             }
         }

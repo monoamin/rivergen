@@ -23,12 +23,12 @@ public abstract class ContextLayer {
         return layerChunks.get(chunkPos);
     }
 
-    public Object addChunk(ChunkPos chunkPos, Object data) {
-        return layerChunks.put(chunkPos, data);
+    public void addChunk(ChunkPos chunkPos, Object data) {
+        layerChunks.put(chunkPos, data);
     }
 
-    public Object delChunk(ChunkPos chunkPos) {
-        return layerChunks.remove(chunkPos);
+    public void delChunk(ChunkPos chunkPos) {
+        layerChunks.remove(chunkPos);
     }
 
     public boolean exists(ChunkPos chunkPos) {

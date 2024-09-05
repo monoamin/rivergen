@@ -17,12 +17,12 @@ public class ElevationContextLayer extends ContextLayer{
         return layerChunks.get(chunkPos);
     }
 
-    public int[][] addChunk(ChunkPos chunkPos, int[][] heightData) {
-        return layerChunks.put(chunkPos, heightData);
+    public void addChunk(ChunkPos chunkPos, int[][] heightData) {
+        layerChunks.put(chunkPos, heightData);
     }
 
-    public int[][] delChunk(ChunkPos chunkPos) {
-        return layerChunks.remove(chunkPos);
+    public void delChunk(ChunkPos chunkPos) {
+        layerChunks.remove(chunkPos);
     }
 
     public boolean exists(ChunkPos chunkPos) {

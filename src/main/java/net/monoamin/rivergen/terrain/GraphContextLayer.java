@@ -8,22 +8,22 @@ import java.util.Map;
 
 public class GraphContextLayer extends ContextLayer{
 
-    private final Map<ChunkPos, WeightedGraph> layerChunks;
+    private Map<ChunkPos, ChunkGraphMap> layerChunks;
 
     public GraphContextLayer() {
-        layerChunks = new HashMap<>();
+        layerChunks = new HashMap<ChunkPos, ChunkGraphMap>();
     }
 
     public WeightedGraph getChunk(ChunkPos chunkPos) {
-        return layerChunks.get(chunkPos);
+        return layerChunks.get(chunkPos).get(chunkPos);
     }
 
-    public WeightedGraph addChunk(ChunkPos chunkPos, WeightedGraph graphData) {
-        return layerChunks.put(chunkPos, graphData);
+    public void addChunk(ChunkPos chunkPos, WeightedGraph graphData) {
+        layerChunks.get(chunkPos).add(graphData, chunkPos);
     }
 
-    public WeightedGraph delChunk(ChunkPos chunkPos) {
-        return layerChunks.remove(chunkPos);
+    public void delChunk(ChunkPos chunkPos) {
+        layerChunks.get(chunkPos).remove(chunkPos);
     }
 
     public boolean exists(ChunkPos chunkPos) {

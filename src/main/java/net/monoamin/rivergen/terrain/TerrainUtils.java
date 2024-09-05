@@ -2,6 +2,7 @@ package net.monoamin.rivergen.terrain;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Tuple;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -139,6 +140,38 @@ public class TerrainUtils {
         return lowestNeighbors.stream()
                 .map(from::add)
                 .collect(Collectors.toList());
+    }
+
+    public static Vec2 getAbsoluteBlockPos(ChunkPos chunkPos, Vec2 relativeBlockPos) {
+        // Each chunk is 16x16 blocks, so we multiply the chunk coordinates by 16 to get the absolute world coordinates
+        int absoluteX = chunkPos.x * 16 + (int)relativeBlockPos.x;
+        int absoluteZ = chunkPos.z * 16 + (int)relativeBlockPos.x;
+
+        // Return the absolute position in the world
+        return new Vec2(absoluteX, absoluteZ);
+    }
+
+    public static Tuple<ChunkPos, Vec2> getChunkPosAndRelativeBlockPos(Vec2 absoluteWorldPos) {
+        // Calculate the chunk coordinates
+        int chunkX = (int) Math.floor(absoluteWorldPos.x / 16);
+        int chunkZ = (int) Math.floor(absoluteWorldPos.y / 16);
+
+        // Create the ChunkPos
+        ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
+
+        // Calculate the relative block position within the chunk
+        float relativeX = absoluteWorldPos.x % 16;
+        float relativeZ = absoluteWorldPos.y % 16;
+
+        // Handle negative modulus to ensure positive relative positions
+        if (relativeX < 0) relativeX += 16;
+        if (relativeZ < 0) relativeZ += 16;
+
+        // Create the relative Vec2
+        Vec2 relativeBlockPos = new Vec2(relativeX, relativeZ);
+
+        // Return the ChunkPos and relative Vec2 as a tuple
+        return new Tuple<>(chunkPos, relativeBlockPos);
     }
 
     public static int getYValueAt(int x, int z) {
