@@ -1,6 +1,5 @@
 package net.monoamin.rivergen.debug;
 
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -10,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.player.Player;
-import net.monoamin.rivergen.gen.RiverGenerationHandler;
+import net.monoamin.rivergen.gen.WorldStateHandler;
 import net.monoamin.rivergen.terrain.TerrainUtils;
 
 public class DebugToolItem extends Item {
@@ -44,7 +43,7 @@ public class DebugToolItem extends Item {
         Player player = context.getPlayer();
         ItemStack itemStack = player.getItemInHand(player.getUsedItemHand());
         BlockPos blockPos = context.getClickedPos();
-        if (!level.isClientSide && player != null) {
+        if (!level.isClientSide) {
             // Example of a right-click on a block doing something
             //DebugMessage.Send("Debug stick usedOn!", player.getServer().overworld());
             performCustomActionOnBlock(level, context, player, blockPos, itemStack);
@@ -97,7 +96,7 @@ public class DebugToolItem extends Item {
                 );
                 break;*/
             case "item.rivergen.get_density":
-                Double density = TerrainUtils.getFinalDensityAt(blockPos);
+                double density = TerrainUtils.getFinalDensityAt(blockPos);
                 DebugMessage.Send("GetDensity used! Normal is " + density, player.getServer().overworld());
                 /*RenderHandler.AddLineIfAbsent(
                         "n"+TerrainUtils.idFromXZ(blockPos),
@@ -108,7 +107,7 @@ public class DebugToolItem extends Item {
                 break;
             case "item.rivergen.start_gen":
                 DebugMessage.Send("StartGen used!", player.getServer().overworld());
-                RiverGenerationHandler.traceRiver(TerrainUtils.BlockPosToVec3(blockPos));
+                WorldStateHandler.traceRiver(TerrainUtils.BlockPosToVec3(blockPos));
                 break;
             default: break;
         }

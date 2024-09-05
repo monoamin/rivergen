@@ -1,4 +1,4 @@
-package net.monoamin.rivergen.spline;
+package net.monoamin.rivergen.mathutils;
 
 import net.minecraft.world.phys.Vec3;
 

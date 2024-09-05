@@ -10,7 +10,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.monoamin.rivergen.gen.RiverGenerationHandler;
+import net.monoamin.rivergen.gen.WorldStateHandler;
 import net.monoamin.rivergen.terrain.TerrainUtils;
 
 @Mod.EventBusSubscriber(modid = "rivergen")
@@ -39,7 +39,7 @@ public class CommandRegistration {
         int z = Integer.parseInt(zVal);
         int height = TerrainUtils.getYValueAt(x, z);
         Vec3 riverPos = new Vec3(x, height, z);
-        RiverGenerationHandler.traceRiver(riverPos);
+        WorldStateHandler.traceRiver(riverPos);
         context.getSource().sendSuccess(() -> Component.literal("River generated at: " + xVal + " " +zVal), false);
         return 1;
     }

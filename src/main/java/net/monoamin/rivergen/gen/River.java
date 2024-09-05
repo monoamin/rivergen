@@ -17,7 +17,7 @@ public class River {
     private final int stepRadiusMin = 8;
     private final int maxStraightDistance = 128;
     private final double forceStepMinSlope = 0;
-    private int straightSteps = 0;
+    private final int straightSteps = 0;
     ServerLevel serverLevel;
 
     public boolean finalized = false;
@@ -67,7 +67,7 @@ public class River {
                 // If terrain at candidate is lower
                 if (yStepCandidate < currentPoint.y) {
                     // Then step to that height
-                    nextPoint = stepCandidate.multiply(1,0,1).add(0,yStepCandidate,0);;
+                    nextPoint = stepCandidate.multiply(1,0,1).add(0,yStepCandidate,0);
                     stepped = true;
                 } else if (yStepCandidate >= currentPoint.y) {
                     // Else stay at the current height

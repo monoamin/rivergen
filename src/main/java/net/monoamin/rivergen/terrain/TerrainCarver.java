@@ -6,7 +6,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.monoamin.rivergen.render.RenderHandler;
-import net.monoamin.rivergen.spline.SplineNode;
+import net.monoamin.rivergen.mathutils.SplineNode;
 import java.util.concurrent.CompletableFuture;
 
 import java.util.*;
@@ -36,36 +36,34 @@ public class TerrainCarver {
 
     private CompletableFuture<Void> carveChannelSplineAsync(ArrayList<SplineNode> splineNodes) {
         return CompletableFuture.runAsync(() -> {
-            try {
-                if (splineNodes.size() < 2) {
-                    return; // Need at least two points to interpolate
+            if (splineNodes.size() < 2) {
+                return; // Need at least two points to interpolate
+            }
+
+            // Step 1: Calculate the total length of the spline
+            float totalLength = 0.0f;
+            for (int i = 0; i < splineNodes.size() - 1; i++) {
+                Vec3 start = splineNodes.get(i).vec3();
+                Vec3 end = splineNodes.get(i + 1).vec3();
+                totalLength += (float) start.distanceTo(end);
+            }
+
+            // Step 2: Iterate through each segment and carve the river
+            float cumulativeLength = 0.0f;
+            for (int i = 0; i < splineNodes.size() - 1; i++) {
+                SplineNode startNode = splineNodes.get(i);
+                SplineNode endNode = splineNodes.get(i + 1);
+                carveSegment(startNode, endNode, cumulativeLength, totalLength);
+
+                // Update cumulative length
+                cumulativeLength += (float) startNode.vec3().distanceTo(endNode.vec3());
+
+                // Optionally, yield control to avoid locking the game loop
+                /* This is evil, so I will leave it out
+                if (i % 10 == 0) {
+                    Thread.sleep(10); // Introduce a brief delay to yield control
                 }
-
-                // Step 1: Calculate the total length of the spline
-                float totalLength = 0.0f;
-                for (int i = 0; i < splineNodes.size() - 1; i++) {
-                    Vec3 start = splineNodes.get(i).vec3();
-                    Vec3 end = splineNodes.get(i + 1).vec3();
-                    totalLength += (float) start.distanceTo(end);
-                }
-
-                // Step 2: Iterate through each segment and carve the river
-                float cumulativeLength = 0.0f;
-                for (int i = 0; i < splineNodes.size() - 1; i++) {
-                    SplineNode startNode = splineNodes.get(i);
-                    SplineNode endNode = splineNodes.get(i + 1);
-                    carveSegment(startNode, endNode, cumulativeLength, totalLength);
-
-                    // Update cumulative length
-                    cumulativeLength += (float) startNode.vec3().distanceTo(endNode.vec3());
-
-                    // Optionally, yield control to avoid locking the game loop
-                    if (i % 10 == 0) {
-                        Thread.sleep(10); // Introduce a brief delay to yield control
-                    }
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // Handle thread interruption
+                */
             }
         });
     }
@@ -246,6 +244,35 @@ public class TerrainCarver {
             }
         }
     }
+
+    private void carveGaussianChannel(Vec3 center, int maxRadius, int heightOffset, int heightAboveCenter, Block block, Block ifNotBlock) {
+    BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
+
+    // Define the coefficient for the Gaussian falloff (inverse bell curve)
+    float bellCoefficient = 4.0f / (maxRadius * maxRadius); // Adjust this coefficient to control the curve's width
+
+    for (int x = -maxRadius; x <= maxRadius; x++) {
+        for (int z = -maxRadius; z <= maxRadius; z++) {
+            // Calculate the squared distance from the center horizontally
+            int distanceSquared = x * x + z * z;
+
+            if (distanceSquared <= maxRadius * maxRadius) {
+                // Calculate the depth using the inverse bell curve (Gaussian function)
+                float normalizedDistance = (float) distanceSquared / (maxRadius * maxRadius);
+                int depth = Math.round(maxRadius * (1.0f - (float) Math.exp(-bellCoefficient * distanceSquared)));
+
+                // Adjust carving range to reach above the center
+                for (int y = -depth; y <= heightAboveCenter + heightOffset; y++) {
+                    blockPos.set(center.x + x, center.y + y, center.z + z);
+                    if (level.getBlockState(blockPos) != ifNotBlock.defaultBlockState()) {
+                        TerrainUtils.setBlock(blockPos, block);
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 
 }

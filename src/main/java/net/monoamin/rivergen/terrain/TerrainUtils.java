@@ -2,18 +2,27 @@ package net.monoamin.rivergen.terrain;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import net.monoamin.rivergen.gen.RiverGenerationHandler;
+import net.monoamin.rivergen.gen.WorldStateHandler;
 
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class TerrainUtils {
+
+    private static final Vec2 POS_X = new Vec2(1,0);
+    private static final Vec2 POS_Z = new Vec2(-1,1);
+    private static final Vec2 NEG_X = new Vec2(0,1);
+    private static final Vec2 NEG_Z = new Vec2(0,-1);
 
     public static Vec3 getSmoothedNormalCorrect(BlockPos pos, int radius) {
         Vec3 accumulatedNormal = new Vec3(0, 0, 0);
@@ -66,10 +75,10 @@ public class TerrainUtils {
                 //int currentX = pos.getX() + dx;
                 //int currentZ = pos.getZ() + dz;
                 //int y = getYValueAt(pos);
-                int ynx = getYValueAt(pos.offset(-1,0,0));
-                int ypx = getYValueAt(pos.offset(1,0,0));
-                int ynz = getYValueAt(pos.offset(0,0,-1));
-                int ypz = getYValueAt(pos.offset(0,0,1));
+                int ynx = getYValueAt(pos.offset(-1, 0, 0));
+                int ypx = getYValueAt(pos.offset(1, 0, 0));
+                int ynz = getYValueAt(pos.offset(0, 0, -1));
+                int ypz = getYValueAt(pos.offset(0, 0, 1));
 
                 // Correct calculation of the local normal
                 double dxHeight = (double) (ypx - ynx) / 2.0;
@@ -94,31 +103,95 @@ public class TerrainUtils {
     }
 
     public static int getYValueAt(Vec3 vec3) {
-        return getYValueAt((int)vec3.x, (int)vec3.z);
+        return getYValueAt((int) vec3.x, (int) vec3.z);
     }
 
     public static int getYValueAt(BlockPos blockPos) {
         return getYValueAt(blockPos.getX(), blockPos.getZ());
     }
 
+    public static List<Vec2> getLowestVonNeumannNeighbors(Vec2 from, List<Double> neighborHood) {
+        // VonNeumann neighborhood includes 4 directions: north, south, east, west
+        // Order of heights in the array:
+        // [ypx, ynx, ypz, ynz]
+
+        Vec2[] directions = {
+                POS_X,        // East
+                NEG_X,    // West
+                POS_Z,        // North
+                NEG_Z     // South
+        };
+
+        int lowest = Integer.MAX_VALUE;
+        List<Vec2> lowestNeighbors = new ArrayList<>();
+
+        // Find the lowest height value among neighbors
+        for (int i = 0; i < 4; i++) {
+            if (neighborHood.get(i) < lowest) {
+                lowest = (int)Math.round(neighborHood.get(i));
+                lowestNeighbors.clear();  // Clear current list when a new lowest is found
+                lowestNeighbors.add(directions[i]);
+            } else if (neighborHood.get(i) == lowest) {
+                lowestNeighbors.add(directions[i]);
+            }
+        }
+
+        // Convert directions relative to 'from'
+        return lowestNeighbors.stream()
+                .map(from::add)
+                .collect(Collectors.toList());
+    }
+
+    public static Vec2 getAbsoluteBlockPos(ChunkPos chunkPos, Vec2 relativeBlockPos) {
+        // Each chunk is 16x16 blocks, so we multiply the chunk coordinates by 16 to get the absolute world coordinates
+        int absoluteX = chunkPos.x * 16 + (int)relativeBlockPos.x;
+        int absoluteZ = chunkPos.z * 16 + (int)relativeBlockPos.x;
+
+        // Return the absolute position in the world
+        return new Vec2(absoluteX, absoluteZ);
+    }
+
+    public static Tuple<ChunkPos, Vec2> getChunkPosAndRelativeBlockPos(Vec2 absoluteWorldPos) {
+        // Calculate the chunk coordinates
+        int chunkX = (int) Math.floor(absoluteWorldPos.x / 16);
+        int chunkZ = (int) Math.floor(absoluteWorldPos.y / 16);
+
+        // Create the ChunkPos
+        ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
+
+        // Calculate the relative block position within the chunk
+        float relativeX = absoluteWorldPos.x % 16;
+        float relativeZ = absoluteWorldPos.y % 16;
+
+        // Handle negative modulus to ensure positive relative positions
+        if (relativeX < 0) relativeX += 16;
+        if (relativeZ < 0) relativeZ += 16;
+
+        // Create the relative Vec2
+        Vec2 relativeBlockPos = new Vec2(relativeX, relativeZ);
+
+        // Return the ChunkPos and relative Vec2 as a tuple
+        return new Tuple<>(chunkPos, relativeBlockPos);
+    }
+
     public static int getYValueAt(int x, int z) {
         BlockPos blockPos = new BlockPos(x, 0, z);
 
-        ChunkAccess chunkAccess = RiverGenerationHandler.serverLevel.getChunk(blockPos);
+        ChunkAccess chunkAccess = WorldStateHandler.serverLevel.getChunk(blockPos);
         ChunkStatus chunkStatus = chunkAccess.getStatus();
-        if (chunkStatus.isOrAfter(ChunkStatus.SURFACE))
-        {
-            return chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x,z);
-        }
-        else
-        {
+        if (chunkStatus.isOrAfter(ChunkStatus.NOISE)) {
+            return chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
+        } else {
+            // This triggers full chunk generation :(
+            // Maybe.. //RiverGenerationHandler.serverLevel.getChunkSource().getGenerator().fillFromNoise() ...
             chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
-            return chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x,z);
+            return chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z);
         }
     }
 
+
     public static double getFinalDensityAt(BlockPos blockPos) {
-        NoiseBasedChunkGenerator generator = (NoiseBasedChunkGenerator) RiverGenerationHandler.serverLevel.getChunkSource().getGenerator();
+        NoiseBasedChunkGenerator generator = (NoiseBasedChunkGenerator) WorldStateHandler.serverLevel.getChunkSource().getGenerator();
         return generator.generatorSettings().get().noiseRouter().finalDensity().compute(new DensityFunction.SinglePointContext(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
     }
 
@@ -187,7 +260,7 @@ public class TerrainUtils {
 
     public static void setBlock(BlockPos blockPos, Block block) {
         //RiverGenerationHandler.serverLevel.getChunkSource().getChunkNow(blockPos.getX() >> 4, blockPos.getZ() >> 4);
-        RiverGenerationHandler.serverLevel.setBlock(blockPos, block.defaultBlockState(), 3);
+        WorldStateHandler.serverLevel.setBlock(blockPos, block.defaultBlockState(), 3);
     }
 
     public static BlockPos getRandomXZWithinCircle(int centerX, int centerZ, double minDistance, double maxDistance, ServerLevel level) {
@@ -215,5 +288,22 @@ public class TerrainUtils {
 
         // Optionally normalize the blended vector if you want a unit vector
         return blendedVec.normalize();
+    }
+
+    public static long[][] deserializeHeightMap(long[] heights)
+    {
+        if (heights.length != 256) {
+            throw new IllegalArgumentException("Array length must be 256 for a 16x16 matrix.");
+        }
+
+        long[][] matrix = new long[16][16];
+
+        for (int i = 0; i < heights.length; i++) {
+            int row = i / 16;  // Calculate the row index
+            int col = i % 16;  // Calculate the column index
+            matrix[row][col] = heights[i];
+        }
+
+        return matrix;
     }
 }
