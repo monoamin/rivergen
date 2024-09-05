@@ -1,6 +1,5 @@
-package net.monoamin.rivergen.world;
+package net.monoamin.rivergen.terrain;
 
-import com.sun.jna.platform.unix.X11;
 import net.minecraft.world.level.ChunkPos;
 import net.monoamin.rivergen.mathutils.WeightedGraph;
 

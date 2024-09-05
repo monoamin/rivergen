@@ -1,6 +1,7 @@
 package net.monoamin.rivergen.gen;
 
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.LevelEvent;
@@ -8,9 +9,12 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.monoamin.rivergen.debug.DebugMessage;
 import net.monoamin.rivergen.mathutils.Spline;
-import net.monoamin.rivergen.world.ChunkGraphMap;
+import net.monoamin.rivergen.terrain.ChunkGraphMap;
+import net.monoamin.rivergen.terrain.ContextLayer;
+import net.monoamin.rivergen.terrain.ContextLayerManager;
 import net.monoamin.rivergen.terrain.TerrainCarver;
 
+import java.util.HashMap;
 import java.util.Random;
 
 @Mod.EventBusSubscriber(modid = "rivergen")
@@ -24,6 +28,7 @@ public class WorldStateHandler {
     static RiverNetwork riverNetwork;
     static TerrainCarver terrainCarver;
     public static ChunkGraphMap chunkGraphMap;
+    public static ContextLayerManager contextLayerManager;
     static Random r = new Random();
 
     @SubscribeEvent
@@ -38,10 +43,18 @@ public class WorldStateHandler {
             world_isLoaded = true;
             riverNetwork = new RiverNetwork(serverLevel, true);
             terrainCarver = new TerrainCarver(serverLevel, 3, 8);
-            DebugMessage.Send("rivergen loaded.", serverLevel);
+            contextLayerManager = new ContextLayerManager();
+
+            // Initialize our context layers
+            // TODO: Do more elegantly
+            contextLayerManager.addLayer(ContextLayer.Types.ELEVATION, new ContextLayer(new HashMap<ChunkPos, int[][]>()));
+            contextLayerManager.addLayer(ContextLayer.Types.CONNECTION_GRAPH, new ContextLayer(new HashMap<ChunkPos, ChunkGraphMap>()));
+
+            DebugMessage.Send("startup complete.", serverLevel);
         }
     }
 
+    // TODO: Move somewhere more appropriate or delete
     public static void traceRiver(Vec3 pos) {
         DebugMessage.Send("running rivergen...", serverLevel);
         River r = riverNetwork.traceRiverFrom(pos, false);
