@@ -14,7 +14,7 @@ public class ContextLayerManager {
         contextLayers.put(type, layer);
     }
 
-    public void getLayer(ContextLayer.Types type){
-        contextLayers.get(type);
+    public ContextLayer getLayer(ContextLayer.Types type){
+        return contextLayers.get(type);
     }
 }

@@ -9,10 +9,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.monoamin.rivergen.debug.DebugMessage;
 import net.monoamin.rivergen.mathutils.Spline;
-import net.monoamin.rivergen.terrain.ChunkGraphMap;
-import net.monoamin.rivergen.terrain.ContextLayer;
-import net.monoamin.rivergen.terrain.ContextLayerManager;
-import net.monoamin.rivergen.terrain.TerrainCarver;
+import net.monoamin.rivergen.terrain.*;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -38,7 +35,6 @@ public class WorldStateHandler {
     @SubscribeEvent
     public static void onWorldLoad(LevelEvent.Load event) {
         if (event.getLevel() instanceof ServerLevel level) {
-            chunkGraphMap = new ChunkGraphMap();
             serverLevel = level.getServer().overworld();
             world_isLoaded = true;
             riverNetwork = new RiverNetwork(serverLevel, true);
@@ -46,9 +42,8 @@ public class WorldStateHandler {
             contextLayerManager = new ContextLayerManager();
 
             // Initialize our context layers
-            // TODO: Do more elegantly
-            contextLayerManager.addLayer(ContextLayer.Types.ELEVATION, new ContextLayer(new HashMap<ChunkPos, int[][]>()));
-            contextLayerManager.addLayer(ContextLayer.Types.CONNECTION_GRAPH, new ContextLayer(new HashMap<ChunkPos, ChunkGraphMap>()));
+            contextLayerManager.addLayer(ContextLayer.Types.ELEVATION, new ElevationContextLayer());
+            contextLayerManager.addLayer(ContextLayer.Types.CONNECTION_GRAPH, new GraphContextLayer());
 
             DebugMessage.Send("startup complete.", serverLevel);
         }

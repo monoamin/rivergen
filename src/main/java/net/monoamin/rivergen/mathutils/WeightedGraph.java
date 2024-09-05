@@ -2,6 +2,7 @@ package net.monoamin.rivergen.mathutils;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec2;
+import net.monoamin.rivergen.terrain.ContextLayer;
 import net.monoamin.rivergen.terrain.TerrainUtils;
 
 import java.util.*;
@@ -101,6 +102,7 @@ public class WeightedGraph {
         return weights;
     }
 
+    @Deprecated
     public static WeightedGraph fromChunk(ChunkAccess chunkAccess){
         WeightedGraph weightedGraph = new WeightedGraph();
         // TODO: Evaluate better alternatives
@@ -127,7 +129,7 @@ public class WeightedGraph {
                     ynz = (int)gridYLevels[x][z-1];
                 }
 
-                Vec2 cursor = new Vec2(x, x);
+                Vec2 cursor = new Vec2(x, z);
                 for (Vec2 lowerNeighbor : TerrainUtils.getLowestVonNeumannNeighbors(cursor, ypx, ynx, ypz, ynz)) {
                     weightedGraph.addEdge(cursor, lowerNeighbor, 1);
                 }
@@ -135,5 +137,32 @@ public class WeightedGraph {
         }
 
         return new WeightedGraph();
+    }
+
+    public static WeightedGraph fromHeightmap(long[][] heightMap) {
+        WeightedGraph weightedGraph = new WeightedGraph();
+
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                // Get current height at (x, z)
+                int yxz = (int)heightMap[x][z];
+
+                // Determine neighbors, ensuring to stay wisthin bounds
+                int ypx = (x < 15) ? (int)heightMap[x+1][z] : yxz;
+                int ynx = (x > 0) ? (int)heightMap[x-1][z] : yxz;
+                int ypz = (z < 15) ? (int)heightMap[x][z+1] : yxz;
+                int ynz = (z > 0) ? (int)heightMap[x][z-1] : yxz;
+
+                // Create a vector for the current position
+                Vec2 cursor = new Vec2(x, z);
+
+                // Get the lowest Von Neumann neighbors and add them to the graph
+                for (Vec2 lowerNeighbor : TerrainUtils.getLowestVonNeumannNeighbors(cursor, ypx, ynx, ypz, ynz)) {
+                    weightedGraph.addEdge(cursor, lowerNeighbor, 1);
+                }
+            }
+        }
+
+        return weightedGraph;
     }
 }

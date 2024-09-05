@@ -14,19 +14,28 @@ import net.monoamin.rivergen.mathutils.WeightedGraph;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-public class RivergenChunkGenerator extends NoiseBasedChunkGenerator {
+public class RGenChunkGenerator extends NoiseBasedChunkGenerator {
 
-    public RivergenChunkGenerator(BiomeSource biomeSource, Holder<NoiseGeneratorSettings> noiseGeneratorSettings)
+    public RGenChunkGenerator(BiomeSource biomeSource, Holder<NoiseGeneratorSettings> noiseGeneratorSettings)
     {
         super(biomeSource, noiseGeneratorSettings);
     }
 
+    // Method that handles the initial terrain filling before all other processing of the chunk is done
     @Override
     public CompletableFuture<ChunkAccess> fillFromNoise(Executor pExecutor, Blender pBlender, RandomState pRandom, StructureManager pStructureManager, ChunkAccess pChunk) {
         // Fill chunk from noise
         CompletableFuture<ChunkAccess> processed = super.fillFromNoise(pExecutor, pBlender, pRandom, pStructureManager, pChunk);
-        // Get raw heightmap data and add it to Context layer
-        WorldStateHandler.contextLayerManager.contextLayers.get(ContextLayer.Types.ELEVATION).layerObject = TerrainUtils.deserializeHeightMap(pChunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE).getRawData());
+
+        // Get raw heightmap data and add it to Context layer, then construct connection graph
+        if (!WorldStateHandler.contextLayerManager.getLayer(ContextLayer.Types.ELEVATION).exists(pChunk.getPos())) {
+            long[][] chunkHeightmap = TerrainUtils.deserializeHeightMap(pChunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE).getRawData());
+            WorldStateHandler.contextLayerManager.getLayer(ContextLayer.Types.ELEVATION).addChunk(pChunk.getPos(), chunkHeightmap);
+
+            WeightedGraph chunkGraph = WeightedGraph.fromHeightmap(chunkHeightmap);
+            WorldStateHandler.contextLayerManager.getLayer(ContextLayer.Types.ELEVATION).addChunk(pChunk.getPos(), chunkGraph);
+        }
+
         // Return Control
         return processed;
     }
@@ -34,12 +43,9 @@ public class RivergenChunkGenerator extends NoiseBasedChunkGenerator {
     @Override
     public void applyCarvers(WorldGenRegion pLevel, long pSeed, RandomState pRandom,BiomeManager pBiomeManager, StructureManager pStructureManager, ChunkAccess pChunk, GenerationStep.Carving pStep )
     {
-        // TODO: Check
-        // Calculate Weighted Graph for Chunk if it doesn't exist
-        if (!WorldStateHandler.chunkGraphMap.exists(pChunk.getPos())) {
-            WeightedGraph chunkGraph = WeightedGraph.fromChunk(pChunk);
-            WorldStateHandler.chunkGraphMap.add(pChunk.getPos(), chunkGraph);
-        }
+        /*
+
+        */
         super.applyCarvers(pLevel, pSeed, pRandom, pBiomeManager, pStructureManager, pChunk, pStep);
     }
 
