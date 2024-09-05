@@ -36,14 +36,10 @@ Rivers must be constructed in their entirety and not simply inferred from local 
 #### **Hooking into the Erosion Step:**
 A practical approach to generating rivers involves hooking into the erosion step of Realistic Terrain Features (RTF) or a similar terrain generation framework. Here’s how it works:
 
-**Process:**
-1. **Droplet Path Identification:** During the erosion step, simulate the paths that droplets of water might take as they flow across the terrain. These paths can reveal natural low points and potential river courses.
+#### **Droplet Path Identification:** During the erosion step, simulate the paths that droplets of water might take as they flow across the terrain. These paths can reveal natural low points and potential river courses.
 2. **Candidate Source Identification:** Identify locations where droplet paths consistently start or converge as candidate sources for rivers.
-3. **Initial Surface Generation:** Generate the initial terrain surface with a larger radius or a non-circular shape to accommodate potential river paths. This surface must extend far enough to allow for the full propagation of river paths, even beyond the player's immediate render distance.
-4. **River Path Tracing:** Trace the river path across the preliminary surface, ensuring the path is fully defined from source to sink. The path must consider the entire potential length of the river, which could span several chunks beyond the current render distance.
-5. **Preliminary Surface Handling:** If a river path extends into an area where chunks have not yet been generated, the algorithm should generate a preliminary surface for those chunks on demand. This "tendrils" approach ensures that river paths can be traced fully, even if it means extending chunk generation beyond what is immediately visible to the player.
 
-#### **Tendrils of Chunk Generation:**
+##### **Tendrils of Chunk Generation:**
 The concept of "tendrils" of chunk generation refers to the necessary extension of chunk generation beyond the player's immediate surroundings. This is crucial for ensuring that river paths can be traced and generated across large distances without interruption.
 
 ![grafik](https://github.com/user-attachments/assets/1a6d757e-977b-4d6a-a333-08e4b90f80c2)
