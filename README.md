@@ -79,7 +79,7 @@ This approach allows world generation to be deferred for chunks that are far fro
 
 ## Contributing
 
-Feel free to submit pull requests for new features, optimizations, or bug fixes. Contributions are especially welcome!
+Feel free to submit pull requests for new features, optimizations, or bug fixes. Contributions are welcome!
 
 ## License
 
