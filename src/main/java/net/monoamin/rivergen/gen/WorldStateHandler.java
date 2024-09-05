@@ -58,9 +58,10 @@ public class WorldStateHandler {
             Spline s = new Spline(r.getPath());
             terrainCarver.asyncCarveChannelSpline(s.generateSplinePoints(20));
         }
-        else{ // if we have less then use the simple carver
-            //terrainCarver.simpleCarveChannelSpline(r.getPath());
+        /* if we have less than use the simple carver
+        else{
+            terrainCarver.simpleCarveChannelSpline(r.getPath());
         }
-
+        */
     }
 }

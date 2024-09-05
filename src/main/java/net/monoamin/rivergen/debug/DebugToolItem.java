@@ -43,7 +43,7 @@ public class DebugToolItem extends Item {
         Player player = context.getPlayer();
         ItemStack itemStack = player.getItemInHand(player.getUsedItemHand());
         BlockPos blockPos = context.getClickedPos();
-        if (!level.isClientSide && player != null) {
+        if (!level.isClientSide) {
             // Example of a right-click on a block doing something
             //DebugMessage.Send("Debug stick usedOn!", player.getServer().overworld());
             performCustomActionOnBlock(level, context, player, blockPos, itemStack);
@@ -96,7 +96,7 @@ public class DebugToolItem extends Item {
                 );
                 break;*/
             case "item.rivergen.get_density":
-                Double density = TerrainUtils.getFinalDensityAt(blockPos);
+                double density = TerrainUtils.getFinalDensityAt(blockPos);
                 DebugMessage.Send("GetDensity used! Normal is " + density, player.getServer().overworld());
                 /*RenderHandler.AddLineIfAbsent(
                         "n"+TerrainUtils.idFromXZ(blockPos),

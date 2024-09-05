@@ -10,7 +10,7 @@ public class RiverNetwork {
 
     ArrayList<River> rivers;
     ServerLevel serverLevel;
-    Boolean lines = false;
+    Boolean lines;
 
     public RiverNetwork(ServerLevel level, boolean drawLines) {
         // Initialize data structures

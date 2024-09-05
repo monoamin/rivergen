@@ -10,8 +10,7 @@ import net.monoamin.rivergen.terrain.TerrainUtils;
 import java.util.HashMap;
 import java.util.Stack;
 
-/** Class to hold data for finite context erosion simulation
- */
+@Deprecated
 public class ErosionDataHolder {
 
     // Stores surface normals at each BlockPos
@@ -28,7 +27,7 @@ public class ErosionDataHolder {
 
     ServerLevel serverLevel;
 
-    Boolean lines = false;
+    Boolean lines;
 
     public ErosionDataHolder(ServerLevel level, boolean drawLines) {
         // Initialize data structures

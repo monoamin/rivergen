@@ -13,7 +13,7 @@ public class WeightedGraph {
 
     // Adds a node to the graph
     public void addNode(Vec2 node) {
-        adjacentList.computeIfAbsent(node, key -> new TreeSet<>());
+        adjacentList.computeIfAbsent(node, key -> new HashSet<>());
     }
 
     // Adds an undirected edge between two nodes with a specific weight
@@ -83,7 +83,7 @@ public class WeightedGraph {
     }
 
     // Checks if there is an edge between two nodes
-    public boolean hasEdge(Vec2 one, int two) {
+    public boolean hasEdge(Vec2 one, Vec2 two) {
         return adjacentList.containsKey(one) && adjacentList.get(one).contains(two);
     }
 
@@ -130,7 +130,7 @@ public class WeightedGraph {
                 }
 
                 Vec2 cursor = new Vec2(x, z);
-                for (Vec2 lowerNeighbor : TerrainUtils.getLowestVonNeumannNeighbors(cursor, ypx, ynx, ypz, ynz)) {
+                for (Vec2 lowerNeighbor : TerrainUtils.getLowestVonNeumannNeighbors(cursor, new int[]{ypx, ynx, ypz, ynz})) {
                     weightedGraph.addEdge(cursor, lowerNeighbor, 1);
                 }
             }
@@ -147,7 +147,7 @@ public class WeightedGraph {
                 // Get current height at (x, z)
                 int yxz = (int)heightMap[x][z];
 
-                // Determine neighbors, ensuring to stay wisthin bounds
+                // Determine neighbors, ensuring to stay within bounds
                 int ypx = (x < 15) ? (int)heightMap[x+1][z] : yxz;
                 int ynx = (x > 0) ? (int)heightMap[x-1][z] : yxz;
                 int ypz = (z < 15) ? (int)heightMap[x][z+1] : yxz;
@@ -157,7 +157,7 @@ public class WeightedGraph {
                 Vec2 cursor = new Vec2(x, z);
 
                 // Get the lowest Von Neumann neighbors and add them to the graph
-                for (Vec2 lowerNeighbor : TerrainUtils.getLowestVonNeumannNeighbors(cursor, ypx, ynx, ypz, ynz)) {
+                for (Vec2 lowerNeighbor : TerrainUtils.getLowestVonNeumannNeighbors(cursor, new int[]{ypx, ynx, ypz, ynz})) {
                     weightedGraph.addEdge(cursor, lowerNeighbor, 1);
                 }
             }
