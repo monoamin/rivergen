@@ -18,6 +18,11 @@ import java.util.stream.Collectors;
 
 public class TerrainUtils {
 
+    private static final Vec2 POS_X = new Vec2(1,0);
+    private static final Vec2 POS_Z = new Vec2(-1,1);
+    private static final Vec2 NEG_X = new Vec2(0,1);;
+    private static final Vec2 NEG_Z = new Vec2(0,-1);
+
     public static Vec3 getSmoothedNormalCorrect(BlockPos pos, int radius) {
         Vec3 accumulatedNormal = new Vec3(0, 0, 0);
         double totalWeight = 0;
@@ -104,28 +109,28 @@ public class TerrainUtils {
         return getYValueAt(blockPos.getX(), blockPos.getZ());
     }
 
-    public static List<Vec2> getLowestVonNeumannNeighbors(Vec2 from, int[] neighborHeights) {
+    public static List<Vec2> getLowestVonNeumannNeighbors(Vec2 from, List<Double> neighborHood) {
         // VonNeumann neighborhood includes 4 directions: north, south, east, west
         // Order of heights in the array:
         // [ypx, ynx, ypz, ynz]
 
         Vec2[] directions = {
-                Vec2.UNIT_X,        // East
-                Vec2.NEG_UNIT_X,    // West
-                Vec2.UNIT_Y,        // North
-                Vec2.NEG_UNIT_Y     // South
+                POS_X,        // East
+                NEG_X,    // West
+                POS_Z,        // North
+                NEG_Z     // South
         };
 
         int lowest = Integer.MAX_VALUE;
         List<Vec2> lowestNeighbors = new ArrayList<>();
 
         // Find the lowest height value among neighbors
-        for (int i = 0; i < neighborHeights.length; i++) {
-            if (neighborHeights[i] < lowest) {
-                lowest = neighborHeights[i];
+        for (int i = 0; i < 4; i++) {
+            if (neighborHood.get(i) < lowest) {
+                lowest = (int)Math.round(neighborHood.get(i));
                 lowestNeighbors.clear();  // Clear current list when a new lowest is found
                 lowestNeighbors.add(directions[i]);
-            } else if (neighborHeights[i] == lowest) {
+            } else if (neighborHood.get(i) == lowest) {
                 lowestNeighbors.add(directions[i]);
             }
         }
@@ -135,77 +140,6 @@ public class TerrainUtils {
                 .map(from::add)
                 .collect(Collectors.toList());
     }
-
-    public static List<Vec2> getHighestVonNeumannNeighbors(Vec2 from) {
-        int highest = -10000;
-        int ypx = getYValueAt((int) from.x + 1, (int) from.y);
-        int ynx = getYValueAt((int) from.x - 1, (int) from.y);
-        int ypz = getYValueAt((int) from.x, (int) from.y + 1);
-        int ynz = getYValueAt((int) from.x, (int) from.y - 1);
-
-        // Find the minimum value among all neighbors
-        highest = Math.max(highest, ypx);
-        highest = Math.max(highest, ynx);
-        highest = Math.max(highest, ypz);
-        highest = Math.max(highest, ynz);
-
-        Map<Vec2, Integer> neighbors = new HashMap<>();
-        neighbors.put(from.add(Vec2.UNIT_X), ypx);
-        neighbors.put(from.add(Vec2.NEG_UNIT_X), ynx);
-        neighbors.put(from.add(Vec2.UNIT_Y), ypz);
-        neighbors.put(from.add(Vec2.NEG_UNIT_Y), ynz);
-
-        int a = neighbors.get(Vec2.UNIT_X);
-        int b = neighbors.get(Vec2.NEG_UNIT_X);
-        int c = neighbors.get(Vec2.UNIT_Y);
-        int d = neighbors.get(Vec2.NEG_UNIT_Y);
-
-        List<Vec2> allHighest = new ArrayList<>();
-        if (a == highest) allHighest.add(Vec2.UNIT_X);
-        if (b == highest) allHighest.add(Vec2.NEG_UNIT_X);
-        if (c == highest) allHighest.add(Vec2.UNIT_Y);
-        if (d == highest) allHighest.add(Vec2.NEG_UNIT_Y);
-
-        return allHighest;
-    }
-
-    public static List<Vec2> getLowestMooreNeighbors(Vec2 from, int[] neighborHeights) {
-        // Moore neighborhood includes 8 directions: north, south, east, west, and the 4 diagonals.
-        // Order of heights in the array:
-        // [ypx, ynx, ypz, ynz, ypxz, ynxz, ypxnz, ynxnz]
-
-        Vec2[] directions = {
-                Vec2.UNIT_X,        // East
-                Vec2.NEG_UNIT_X,    // West
-                Vec2.UNIT_Y,        // North
-                Vec2.NEG_UNIT_Y,    // South
-                Vec2.UNIT_X.add(Vec2.UNIT_Y),    // Northeast (East + North)
-                Vec2.NEG_UNIT_X.add(Vec2.UNIT_Y),// Northwest (West + North)
-                Vec2.UNIT_X.add(Vec2.NEG_UNIT_Y),// Southeast (East + South)
-                Vec2.NEG_UNIT_X.add(Vec2.NEG_UNIT_Y) // Southwest (West + South)
-        };
-
-        int lowest = Integer.MAX_VALUE;
-        List<Vec2> lowestNeighbors = new ArrayList<>();
-
-        // Find the lowest height value among neighbors
-        for (int i = 0; i < neighborHeights.length; i++) {
-            if (neighborHeights[i] < lowest) {
-                lowest = neighborHeights[i];
-                lowestNeighbors.clear();  // Clear current list when a new lowest is found
-                lowestNeighbors.add(directions[i]);
-            } else if (neighborHeights[i] == lowest) {
-                lowestNeighbors.add(directions[i]);
-            }
-        }
-
-        // Convert directions relative to 'from'
-        return lowestNeighbors.stream()
-                .map(from::add)
-                .collect(Collectors.toList());
-    }
-
-
 
     public static int getYValueAt(int x, int z) {
         BlockPos blockPos = new BlockPos(x, 0, z);
