@@ -33,12 +33,6 @@ Rivers must be constructed in their entirety and not simply inferred from local 
 - **Resolution:**
   To resolve this paradox, river paths must be fully constructed when first identified, rather than being generated only as needed. This ensures that when the player returns to any part of the river, the entire river path has already been generated, preserving consistency and discoverability.
 
-#### **Hooking into the Erosion Step:**
-A practical approach to generating rivers involves hooking into the erosion step of Realistic Terrain Features (RTF) or a similar terrain generation framework. Here’s how it works:
-
-#### **Droplet Path Identification:** During the erosion step, simulate the paths that droplets of water might take as they flow across the terrain. These paths can reveal natural low points and potential river courses.
-2. **Candidate Source Identification:** Identify locations where droplet paths consistently start or converge as candidate sources for rivers.
-
 ##### **Tendrils of Chunk Generation:**
 The concept of "tendrils" of chunk generation refers to the necessary extension of chunk generation beyond the player's immediate surroundings. This is crucial for ensuring that river paths can be traced and generated across large distances without interruption.
 
